@@ -41,7 +41,7 @@ public class SceneController : MonoBehaviour
         mode = FADE_MODE.FADEMODE_NONE;
         nextScene = null;
         fadeCount = fadeTime;
-        mat.SetFloat("_Percent", 1.0f);
+        mat.SetFloat("_Percent", 0.0f);
     }
 
     private void Update()
