@@ -1,14 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using System;
+
+public class EventArgsPlayer : EventArgs
+{
+    public Collider col;
+}
 
 public class PlayerControl : MonoBehaviour
 {
     [System.Serializable]
     class MOVE_DESC
     {
-        public float MaxSpeed;
-        public float Speed;
+        public float WalkSpeed;
+        public float RunSpeed;
         public float FallRate;
     }
 
@@ -28,12 +32,23 @@ public class PlayerControl : MonoBehaviour
 
     private void OnValidate()
     {
-        MoveDesc.MaxSpeed = Mathf.Max(0.0f, MoveDesc.MaxSpeed);
-        MoveDesc.Speed = Mathf.Max(0.0f, Mathf.Min(MoveDesc.Speed, MoveDesc.MaxSpeed));
-        MoveDesc.FallRate = Mathf.Max(0.0f, MoveDesc.FallRate);
+        MoveDesc.RunSpeed = Mathf.Max(0.0f, MoveDesc.RunSpeed);
+        MoveDesc.WalkSpeed = Mathf.Max(0.0f, Mathf.Min(MoveDesc.WalkSpeed, MoveDesc.RunSpeed));
+        MoveDesc.FallRate = Mathf.Max(0.01f, MoveDesc.FallRate);
         MoveDesc.FallRate = Mathf.Min(1.0f, MoveDesc.FallRate);
 
         RotDesc.Speed = Mathf.Max(0.0f, RotDesc.Speed);
+    }
+
+    public event EventHandler<EventArgsPlayer> OnTriggerStayEvent = delegate { };
+    public event EventHandler<EventArgsPlayer> OnTriggerExitEvent = delegate { };
+    public event EventHandler<EventArgsPlayer> OnTriggerEnterEvent = delegate { };
+
+    EventArgsPlayer args;
+
+    private void Awake()
+    {
+        args = new EventArgsPlayer();
     }
 
     // Use this for initialization
@@ -53,21 +68,29 @@ public class PlayerControl : MonoBehaviour
     {
         float inputX = Input.GetAxis("LeftStickX");
         float inputY = Input.GetAxis("LeftStickY");
-        if (Mathf.Abs(inputX) > 0.1f)
+        float Speed = 0;
+        if (Input.GetAxis("RunTrigger") < 0.8f)
         {
-            move += transform.right * inputX * Time.deltaTime * MoveDesc.Speed;
+            Speed = MoveDesc.WalkSpeed;
         }
-        if (Mathf.Abs(inputY) > 0.1f)
+        else
         {
-            move += transform.forward * inputY * Time.deltaTime * MoveDesc.Speed;
+            Speed = MoveDesc.RunSpeed;
         }
 
+        Vector3 accel = Vector3.zero;
+        if (Mathf.Abs(inputX) > 0.3f)
+        {
+            accel += transform.right * inputX * Time.deltaTime * Speed;
+        }
+        if (Mathf.Abs(inputY) > 0.3f)
+        {
+            accel += transform.forward * inputY * Time.deltaTime * Speed;
+        }
+
+        move += accel;
         move *= MoveDesc.FallRate;
 
-        if (move.magnitude > MoveDesc.MaxSpeed)
-        {
-            move = move.normalized * MoveDesc.MaxSpeed;
-        }
         if (move.magnitude < 0.01f)
         {
             move = Vector3.zero;
@@ -76,22 +99,44 @@ public class PlayerControl : MonoBehaviour
 
     void Rotate()
     {
-        float inputTrigger = Input.GetAxis("CameraTrigger");
-        //Debug.Log(inputTrigger);
-        if (Mathf.Abs(inputTrigger) < 0.1f)
+        float inputTriggerX = Input.GetAxis("CameraTriggerX");
+        float inputTriggerY = Input.GetAxis("CameraTriggerY");
+
+        if (Mathf.Abs(inputTriggerX) > 0.3f)
         {
-            return;
+            transform.localRotation *= Quaternion.AngleAxis(inputTriggerX * Time.deltaTime * RotDesc.Speed, transform.up);
         }
-
-        Vector3 newRot = transform.localEulerAngles;
-        newRot.y += inputTrigger * Time.deltaTime * RotDesc.Speed;
-        transform.localEulerAngles = newRot;
-
+        if (Mathf.Abs(inputTriggerY) > 0.3f)
+        {
+            Camera camera = GetComponentInChildren<Camera>();
+            camera.transform.localRotation *= Quaternion.AngleAxis(inputTriggerY * Time.deltaTime * RotDesc.Speed, -Vector3.right);
+        }
     }
 
     private void Move()
     {
         MoveCalc();
         transform.position += move;
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (Input.GetAxis("ActionTrigger") > 0.9f)
+        {
+            args.col = other;
+            OnTriggerStayEvent(this, args);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        args.col = other;
+        OnTriggerEnterEvent(this, args);
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        args.col = other;
+        OnTriggerExitEvent(this, args);
     }
 }

@@ -25,7 +25,10 @@ public class SceneController : MonoBehaviour
     private float fadeTime;
     private float fadeCount;
 
-    private Material mat;
+    static public Text debugText;
+
+    [SerializeField]
+    private Material matFade;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Initialize()
@@ -34,18 +37,47 @@ public class SceneController : MonoBehaviour
         DontDestroyOnLoad(obj);
     }
 
+    private int frameCount = 0;
+    private float prevTime = 0.0f;
+
     // Use this for initialization
     void Awake()
     {
-        mat = GetComponentInChildren<Image>().material;
+        debugText = GetComponentInChildren<Text>();
         mode = FADE_MODE.FADEMODE_NONE;
         nextScene = null;
         fadeCount = fadeTime;
-        mat.SetFloat("_Percent", 0.0f);
+        matFade.SetFloat("_Percent", 0.0f);
+    }
+
+    private void Start()
+    {
+        if (!Debug.isDebugBuild)
+        {
+            debugText.gameObject.SetActive(false);
+            return;
+        }
+
+        frameCount = 0;
+        prevTime = 0.0f;
     }
 
     private void Update()
     {
+        if (Debug.isDebugBuild)
+        {
+            frameCount++;
+            float time = Time.realtimeSinceStartup - prevTime;
+
+            if (time >= 0.5f)
+            {
+                debugText.text = string.Format("{0:F2}fps", frameCount / time);
+
+                frameCount = 0;
+                prevTime = Time.realtimeSinceStartup;
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
 #if UNITY_EDITOR
@@ -89,7 +121,7 @@ public class SceneController : MonoBehaviour
             }
         }
 
-        mat.SetFloat("_Percent", fadeCount / fadeTime);
+        matFade.SetFloat("_Percent", fadeCount / fadeTime);
 
         if (!IsLoad)
         {

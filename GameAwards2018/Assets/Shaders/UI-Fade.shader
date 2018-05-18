@@ -49,7 +49,7 @@ Shader "UI/Fade"
 			CGPROGRAM
 				#pragma vertex vert
 				#pragma fragment frag
-				#pragma target 2.0
+				#pragma target 4.0
 
 				#include "UnityCG.cginc"
 				#include "UnityUI.cginc"
