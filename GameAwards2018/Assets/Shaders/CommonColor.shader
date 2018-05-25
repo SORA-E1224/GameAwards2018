@@ -22,6 +22,7 @@
 
 			float _Density;
 			sampler2D _MainTex;
+			float4 _Diffuse;
 
 			void vert(inout appdata_full v, out Input o)
 			{

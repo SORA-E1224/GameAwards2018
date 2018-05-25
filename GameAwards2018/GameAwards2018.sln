@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAwards2018", "Assembly-CSharp.csproj", "{302DC933-CB01-C312-5A0E-F3F993EF513E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAwards2018", "Assembly-CSharp-firstpass.csproj", "{46766C1E-AAAB-1B1E-67D7-442E92934B7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAwards2018", "Assembly-CSharp-Editor-firstpass.csproj", "{7CDEEC5C-0B90-DBA8-BB37-FC632FCB9D53}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +17,14 @@ Global
 		{302DC933-CB01-C312-5A0E-F3F993EF513E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{302DC933-CB01-C312-5A0E-F3F993EF513E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{302DC933-CB01-C312-5A0E-F3F993EF513E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46766C1E-AAAB-1B1E-67D7-442E92934B7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46766C1E-AAAB-1B1E-67D7-442E92934B7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46766C1E-AAAB-1B1E-67D7-442E92934B7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46766C1E-AAAB-1B1E-67D7-442E92934B7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CDEEC5C-0B90-DBA8-BB37-FC632FCB9D53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CDEEC5C-0B90-DBA8-BB37-FC632FCB9D53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CDEEC5C-0B90-DBA8-BB37-FC632FCB9D53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CDEEC5C-0B90-DBA8-BB37-FC632FCB9D53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

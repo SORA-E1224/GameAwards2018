@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -10,6 +8,7 @@ using UnityEditor;
 
 public class SceneController : MonoBehaviour
 {
+    // Fade変数群
     public enum FADE_MODE
     {
         FADEMODE_NONE = 0,
@@ -25,25 +24,30 @@ public class SceneController : MonoBehaviour
     private float fadeTime;
     private float fadeCount;
 
-    static public Text debugText;
-
     [SerializeField]
     private Material matFade;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Initialize()
     {
-        Object obj = Instantiate(Resources.Load("Prefabs/pre_SceneController"));
+        UnityEngine.Object obj = Instantiate(Resources.Load("Prefabs/pre_SceneController"));
         DontDestroyOnLoad(obj);
     }
 
+    // デバッグテキスト変数
+    static public EventHandler WriteDebugTextEvent = delegate { };
+    static private string debugText;
+    [SerializeField]
+    private GUIStyleState gUIStyleState;
+    private GUIStyle gUIStyle;
     private int frameCount = 0;
     private float prevTime = 0.0f;
+    static private float fps = 0.0f;
 
     // Use this for initialization
     void Awake()
     {
-        debugText = GetComponentInChildren<Text>();
+        debugText = "";
         mode = FADE_MODE.FADEMODE_NONE;
         nextScene = null;
         fadeCount = fadeTime;
@@ -54,10 +58,12 @@ public class SceneController : MonoBehaviour
     {
         if (!Debug.isDebugBuild)
         {
-            debugText.gameObject.SetActive(false);
             return;
         }
-
+        gUIStyle = new GUIStyle();
+        gUIStyle.fontSize = 64;
+        gUIStyle.fontStyle = FontStyle.Bold;
+        gUIStyle.normal.textColor = Color.yellow;
         frameCount = 0;
         prevTime = 0.0f;
     }
@@ -71,7 +77,7 @@ public class SceneController : MonoBehaviour
 
             if (time >= 0.5f)
             {
-                debugText.text = string.Format("{0:F2}fps", frameCount / time);
+                fps = frameCount / time;
 
                 frameCount = 0;
                 prevTime = Time.realtimeSinceStartup;
@@ -143,11 +149,31 @@ public class SceneController : MonoBehaviour
         }
 
         nextScene = sceneName;
-
     }
 
-    static public void Load(string SceneName)
+    static public void WriteDebugText(string s)
     {
-        SceneManager.LoadScene(SceneName);
+        debugText += s;
     }
+
+    static public void WriteLineDebugText(string s)
+    {
+        debugText += s;
+        debugText += Environment.NewLine;
+    }
+
+    private void OnGUI()
+    {
+        if (Debug.isDebugBuild)
+        {
+            WriteLineDebugText(string.Format("{0:F2}fps", fps));
+
+            WriteDebugTextEvent(null, null);
+
+            GUI.Label(new Rect(10, 10, Screen.width - 10, Screen.height - 10), debugText, gUIStyle);
+
+            debugText = "";
+        }
+    }
+
 }
