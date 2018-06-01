@@ -59,9 +59,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\CharaControl.cs" />
     <Compile Include="Assets\Scripts\DoorControl.cs" />
     <Compile Include="Assets\Scripts\EnemyControl.cs" />
+    <Compile Include="Assets\Scripts\EnemyVisionScript.cs" />
     <Compile Include="Assets\Scripts\GameMainManager.cs" />
+    <Compile Include="Assets\Scripts\MarkerControl.cs" />
     <Compile Include="Assets\Scripts\PlayerControl.cs" />
     <Compile Include="Assets\Scripts\SceneController.cs" />
     <Compile Include="Assets\Scripts\TitleManager.cs" />

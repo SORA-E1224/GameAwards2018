@@ -1,11 +1,6 @@
 ﻿using UnityEngine;
 using System;
 
-public class EventArgsPlayer : EventArgs
-{
-    public Collider col;
-}
-
 public class PlayerControl : MonoBehaviour
 {
     [System.Serializable]
@@ -40,30 +35,13 @@ public class PlayerControl : MonoBehaviour
         RotDesc.Speed = Mathf.Max(0.0f, RotDesc.Speed);
     }
 
-    public event EventHandler<EventArgsPlayer> OnTriggerActionEvent = delegate { };
-    public event EventHandler<EventArgsPlayer> OnTriggerActionTriggerEvent = delegate { };
-    public event EventHandler<EventArgsPlayer> OnTriggerExitEvent = delegate { };
-    public event EventHandler<EventArgsPlayer> OnTriggerEnterEvent = delegate { };
     private bool IsActionTrigger = false;
-
-    EventArgsPlayer args;
-
-    private void Awake()
-    {
-        args = new EventArgsPlayer();
-    }
 
     // Use this for initialization
     void Start()
     {
         IsActionTrigger = false;
         characterController = GetComponent<CharacterController>();
-        SceneController.WriteDebugTextEvent += delegate (object sender, EventArgs e)
-          {
-              SceneController.WriteLineDebugText("***PlayerData***");
-              SceneController.WriteLineDebugText(string.Format("Velocity:({0:F2}, {1:F2}, {2:F2})", characterController.velocity.x, characterController.velocity.y, characterController.velocity.z));
-              SceneController.WriteLineDebugText(string.Format("Speed:{0:F2}", characterController.velocity.magnitude));
-          };
     }
 
     // Update is called once per frame
@@ -145,27 +123,16 @@ public class PlayerControl : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (Input.GetAxis("ActionTrigger") > 0.9f)
+        if (other.tag == "Door")
         {
-            args.col = other;
-            OnTriggerActionEvent(this, args);
-            if(!IsActionTrigger)
+            if (Input.GetAxis("ActionTrigger") > 0.9f)
             {
-                OnTriggerActionTriggerEvent(this, args);
-                IsActionTrigger = true;
+                if (!IsActionTrigger)
+                {
+                    other.transform.parent.GetComponent<DoorControl>().DoorAction();
+                    IsActionTrigger = true;
+                }
             }
         }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        args.col = other;
-        OnTriggerEnterEvent(this, args);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        args.col = other;
-        OnTriggerExitEvent(this, args);
     }
 }
