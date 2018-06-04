@@ -61,7 +61,7 @@ public class SceneController : MonoBehaviour
             return;
         }
         gUIStyle = new GUIStyle();
-        gUIStyle.fontSize = 64;
+        gUIStyle.fontSize = 24;
         gUIStyle.fontStyle = FontStyle.Bold;
         gUIStyle.normal.textColor = Color.yellow;
         frameCount = 0;

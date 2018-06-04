@@ -1,25 +1,46 @@
 ﻿using UnityEngine;
 
-public class CharaControl : MonoBehaviour
+public abstract class CharaControl : MonoBehaviour
 {
-    protected bool isDead;
-
-    enum HEALTH_STATE
+    public enum HEALTH_STATE
     {
         HEALTH = 0,
-        INVINCIBLE,
-        OUTBREAK
+        IMMUNITY,
+        OUTBREAK,
+        DEAD
     }
+    [HideInInspector]
+    public HEALTH_STATE healthState;
 
+    [SerializeField]
+    HEALTH_STATE StartHealthState = HEALTH_STATE.HEALTH;
+
+    private float healthCount = 0f;
+
+    [SerializeField, Range(0f, 100f)]
+    private float ImmunityTime = 0f;
 
     // Use this for initialization
-    void Start()
+    protected virtual void Start()
     {
-        isDead = false;
+        healthCount = 0f;
+        healthState = StartHealthState;
     }
 
-    void Caught()
+    protected virtual void Update()
     {
+        if (healthState == HEALTH_STATE.IMMUNITY)
+        {
+            healthCount += Time.deltaTime;
+            if (healthCount > ImmunityTime)
+            {
+                healthCount = 0f;
+                healthState = HEALTH_STATE.HEALTH;
+            }
+        }
+
 
     }
+
+    public abstract void Caught();
 }

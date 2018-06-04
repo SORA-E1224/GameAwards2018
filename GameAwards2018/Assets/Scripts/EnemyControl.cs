@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyControl : MonoBehaviour
+public class EnemyControl : CharaControl
 {
     private NavMeshAgent agent;
 
@@ -12,7 +12,7 @@ public class EnemyControl : MonoBehaviour
         PATROL,
         CHASE,
         RUN,
-        MAX
+        CHARGE
     }
 
     ENEMY_STATE state;
@@ -20,6 +20,12 @@ public class EnemyControl : MonoBehaviour
     GameObject[] markers;
     int targetIndex;
     float count;
+
+    [SerializeField]
+    ParticleSystem particle;
+
+    [SerializeField]
+    float ChargeTime = 0f;
 
     [System.Serializable]
     class VISION_DESC
@@ -44,8 +50,13 @@ public class EnemyControl : MonoBehaviour
     [SerializeField]
     LayerMask mask;
 
+    [SerializeField]
+    bool IsVisibility = false;
+
     private void OnValidate()
     {
+        ChargeTime = Mathf.Max(0f, ChargeTime);
+
         if (visionDesc.Field)
         {
             visionDesc.Visibility = Mathf.Max(0f, visionDesc.Visibility);
@@ -66,8 +77,9 @@ public class EnemyControl : MonoBehaviour
     }
 
     // Use this for initialization
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         count = 0f;
         state = ENEMY_STATE.PATROL;
         markers = GameObject.FindGameObjectsWithTag("Marker");
@@ -75,26 +87,22 @@ public class EnemyControl : MonoBehaviour
         System.Random rand = new System.Random();
         targetIndex = rand.Next(markers.Length);
         agent.SetDestination(markers[targetIndex].transform.position);
+
+        visionDesc.Field.GetComponent<MeshRenderer>().enabled = IsVisibility;
+        hearingDesc.Field.GetComponent<MeshRenderer>().enabled = IsVisibility;
+
         SceneController.WriteDebugTextEvent += delegate (object sender, EventArgs e)
         {
             SceneController.WriteLineDebugText("***EnemyData***");
-            string buf;
-            if (targetIndex < 0 || targetIndex >= markers.Length)
-            {
-                buf = "None";
-            }
-            else
-            {
-                buf = markers[targetIndex].name;
-            }
-            SceneController.WriteLineDebugText(string.Format("Target : {0}", buf));
-            SceneController.WriteLineDebugText(string.Format("State : {0}", state));
+            SceneController.WriteLineDebugText(string.Format("Health : {0}", healthState));
+            SceneController.WriteLineDebugText(string.Format("EnemyState : {0}", state));
         };
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         switch (state)
         {
             case ENEMY_STATE.NONE:
@@ -116,6 +124,16 @@ public class EnemyControl : MonoBehaviour
                 }
                 agent.SetDestination(chaseObj.transform.position);
                 Vector3 runnerDist = chaseObj.transform.position - transform.position;
+                if (runnerDist.magnitude < 2.0f)
+                {
+                    CharaControl charaControl = chaseObj.GetComponent<CharaControl>();
+                    if (charaControl.healthState == HEALTH_STATE.HEALTH)
+                    {
+                        charaControl.Caught();
+                        state = ENEMY_STATE.RUN;
+                        healthState = HEALTH_STATE.IMMUNITY;
+                    }
+                }
                 if (runnerDist.magnitude > hearingDesc.Radius)
                 {
                     count += Time.deltaTime;
@@ -133,10 +151,6 @@ public class EnemyControl : MonoBehaviour
                 }
                 break;
             case ENEMY_STATE.RUN:
-                if (targetIndex == -1)
-                {
-                    SearchEscapeMarker();
-                }
                 Vector3 markerDist = markers[targetIndex].transform.position - transform.position;
                 if (markerDist.magnitude < 1.0f)
                 {
@@ -160,6 +174,17 @@ public class EnemyControl : MonoBehaviour
                 }
 
                 break;
+            case ENEMY_STATE.CHARGE:
+                agent.isStopped = true;
+                count += Time.deltaTime;
+                if (count > ChargeTime)
+                {
+                    count = 0f;
+                    state = ENEMY_STATE.PATROL;
+                    agent.isStopped = false;
+                    particle.Stop();
+                }
+                break;
             default:
                 state = ENEMY_STATE.NONE;
                 break;
@@ -175,24 +200,29 @@ public class EnemyControl : MonoBehaviour
         RaycastHit hit;
         Physics.Raycast(ray, out hit, Mathf.Infinity, mask);
         Debug.DrawRay(col.transform.position, rayDir * hit.distance, Color.red);
-        Debug.Log(hit.collider.tag);
-        if (tag == "Outbreak")
+        CharaControl charaScript = hit.collider.GetComponent<CharaControl>();
+        if (!charaScript)
         {
-            if (hit.collider.tag == "Health")
+            return;
+        }
+
+        if (healthState == HEALTH_STATE.OUTBREAK && state != ENEMY_STATE.CHARGE)
+        {
+            if (charaScript.healthState == HEALTH_STATE.HEALTH)
             {
                 chaseObj = hit.collider.gameObject;
                 state = ENEMY_STATE.CHASE;
                 count = 0f;
             }
         }
-        else if (tag == "Health")
+        else if (healthState == HEALTH_STATE.HEALTH || healthState == HEALTH_STATE.IMMUNITY)
         {
-            if (hit.collider.tag == "Outbreak")
+            if (charaScript.healthState == HEALTH_STATE.OUTBREAK)
             {
                 chaseObj = hit.collider.gameObject;
                 state = ENEMY_STATE.RUN;
-                targetIndex = -1;
                 count = 0f;
+                SearchEscapeMarker();
             }
         }
     }
@@ -223,5 +253,18 @@ public class EnemyControl : MonoBehaviour
         {
             other.transform.parent.GetComponent<DoorControl>().DoorOpen();
         }
+    }
+
+    public override void Caught()
+    {
+        if (healthState != HEALTH_STATE.HEALTH)
+        {
+            return;
+        }
+
+        healthState = HEALTH_STATE.OUTBREAK;
+        state = ENEMY_STATE.CHARGE;
+        count = 0f;
+        particle.Play();
     }
 }

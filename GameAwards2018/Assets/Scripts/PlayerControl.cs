@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 
-public class PlayerControl : MonoBehaviour
+public class PlayerControl : CharaControl
 {
     [System.Serializable]
     class MOVE_DESC
@@ -36,21 +36,60 @@ public class PlayerControl : MonoBehaviour
     }
 
     private bool IsActionTrigger = false;
+    private bool IsCharge = false;
+    private float chargeCount = 0f;
+    [SerializeField]
+    ParticleSystem particle;
+    [SerializeField, Range(0f, 100f)]
+    float ChargeTime = 0f;
+
+    [SerializeField]
+    bool IsVisibility = false;
 
     // Use this for initialization
-    void Start()
+    protected override void Start()
     {
+        base.Start();
+        healthState = HEALTH_STATE.OUTBREAK;
         IsActionTrigger = false;
+        IsCharge = false;
         characterController = GetComponent<CharacterController>();
+
+        GameObject touchField = transform.Find("TouchField").gameObject;
+        touchField.GetComponent<MeshRenderer>().enabled = IsVisibility;
+
+        SceneController.WriteDebugTextEvent += delegate (object sender, EventArgs e)
+        {
+            SceneController.WriteLineDebugText("***PlayerData***");
+            SceneController.WriteLineDebugText(string.Format("Health : {0}", healthState));
+        };
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         if (Input.GetAxis("ActionTrigger") < 0.9f)
         {
             IsActionTrigger = false;
         }
+        else
+        {
+            IsActionTrigger = true;
+        }
+
+        if (IsCharge)
+        {
+            chargeCount += Time.deltaTime;
+            if (chargeCount > ChargeTime)
+            {
+                chargeCount = 0f;
+                IsCharge = false;
+                particle.Stop();
+            }
+            return;
+        }
+
         Rotate();
         Move();
     }
@@ -134,5 +173,37 @@ public class PlayerControl : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void Catch(GameObject player)
+    {
+        CharaControl charaControl = player.GetComponent<CharaControl>();
+        if (charaControl.healthState != HEALTH_STATE.HEALTH)
+        {
+            return;
+        }
+
+        if (Input.GetAxis("ActionTrigger") > 0.9f)
+        {
+            if (!IsActionTrigger)
+            {
+                charaControl.Caught();
+                healthState = HEALTH_STATE.IMMUNITY;
+                IsActionTrigger = true;
+            }
+        }
+    }
+
+    public override void Caught()
+    {
+        if (healthState != HEALTH_STATE.HEALTH)
+        {
+            return;
+        }
+
+        healthState = HEALTH_STATE.OUTBREAK;
+        IsCharge = true;
+        chargeCount = 0f;
+        particle.Play();
     }
 }

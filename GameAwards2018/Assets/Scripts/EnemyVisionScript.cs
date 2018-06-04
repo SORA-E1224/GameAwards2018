@@ -11,7 +11,7 @@ public class EnemyVisionScript : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.tag == "Outbreak" || other.tag == "Health")
+        if (other.tag == "Player")
         {
             triggerEvent.Invoke(other.gameObject);
         }
