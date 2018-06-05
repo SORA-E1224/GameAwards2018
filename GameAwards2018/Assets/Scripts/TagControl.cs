@@ -5,6 +5,7 @@ using TMPro;
 public class TagControl : MonoBehaviour
 {
     List<GameObject> playerList = new List<GameObject>();
+    List<int> deadList = new List<int>();
     private int targetCamera = 0;
     private bool trigger;
 
@@ -12,8 +13,16 @@ public class TagControl : MonoBehaviour
     TextMeshProUGUI textMeshPro;
     [SerializeField, Range(1f, 1000f)]
     float CycleTime = 30f;
+    [SerializeField, Range(1f, 1000f)]
+    float DeadTime = 10f;
 
-    float time = 0f;
+    bool IsCycle = true;
+    float time;
+
+    private void OnValidate()
+    {
+        time = CycleTime;
+    }
 
     // Use this for initialization
     void Start()
@@ -29,6 +38,7 @@ public class TagControl : MonoBehaviour
             }
         }
         trigger = false;
+        IsCycle = true;
         time = CycleTime;
     }
 
@@ -36,22 +46,60 @@ public class TagControl : MonoBehaviour
     void Update()
     {
         time -= Time.deltaTime;
-        if (time < 0f)
+        if (IsCycle)
         {
-            time = CycleTime;
-        }
-        string timeStr;
-        int timeDecimal = Mathf.FloorToInt((time - Mathf.Floor(time)) * 100f);
-        timeStr = string.Format("{0:D2}:{1:D2}", Mathf.FloorToInt(time), timeDecimal);
-        textMeshPro.SetText(timeStr);
-        if (time < 10f)
-        {
-            textMeshPro.color = Color.red;
+            if (time < 0f)
+            {
+                time = DeadTime;
+                IsCycle = false;
+                for (int i = 0; i < playerList.Count; i++)
+                {
+                    CharaControl charaControl = playerList[i].GetComponent<CharaControl>();
+                    if (charaControl.healthState == CharaControl.HEALTH_STATE.OUTBREAK)
+                    {
+                        charaControl.Dead();
+                        deadList.Add(i);
+                    }
+                }
+            }
+            string timeStr;
+            int timeDecimal = Mathf.FloorToInt((time - Mathf.Floor(time)) * 100f);
+            timeStr = string.Format("{0:D2}:{1:D2}", Mathf.FloorToInt(time), timeDecimal);
+            textMeshPro.SetText(timeStr);
+            if (time < 10f)
+            {
+                textMeshPro.color = Color.red;
+            }
+            else
+            {
+                textMeshPro.color = Color.white;
+            }
         }
         else
         {
-            textMeshPro.color = Color.white;
+            textMeshPro.SetText("BREAK");
+            textMeshPro.color = Color.yellow;
+            if (time < 0f)
+            {
+                time = CycleTime;
+                IsCycle = true;
+                int deadCount = 0;
+                foreach (var i in deadList)
+                {
+                    CharaControl charaControl = playerList[i - deadCount].GetComponent<CharaControl>();
+                    charaControl.Destroy();
+                    playerList.RemoveAt(i - deadCount);
+                    deadCount++;
+                }
+                deadList.Clear();
+
+                System.Random rand = new System.Random();
+                CharaControl nextOutbreakChara = playerList[rand.Next(playerList.Count)].GetComponent<CharaControl>();
+                nextOutbreakChara.Caught();
+            }
         }
+
+
 
         if (Input.GetAxis("ChangeCamera") > 0.9f && !trigger)
         {

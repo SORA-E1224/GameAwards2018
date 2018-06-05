@@ -43,4 +43,8 @@ public abstract class CharaControl : MonoBehaviour
     }
 
     public abstract void Caught();
+
+    public abstract void Dead();
+
+    public abstract void Destroy();
 }

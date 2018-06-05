@@ -206,4 +206,22 @@ public class PlayerControl : CharaControl
         chargeCount = 0f;
         particle.Play();
     }
+
+    public override void Dead()
+    {
+        healthState = HEALTH_STATE.DEAD;
+        var colorOverLifetime = particle.colorOverLifetime;
+        var gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(new Color32(0, 128, 255, 255), 0.0f), new GradientColorKey(Color.white, 1.0f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(1.0f, 0.72f), new GradientAlphaKey(0.0f, 1.0f) }
+            );
+        colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
+        particle.Play();
+    }
+
+    public override void Destroy()
+    {
+        Destroy(gameObject);
+    }
 }

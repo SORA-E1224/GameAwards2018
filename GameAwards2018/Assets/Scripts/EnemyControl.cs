@@ -8,7 +8,7 @@ public class EnemyControl : CharaControl
 
     enum ENEMY_STATE
     {
-        NONE = 0,
+        DEAD = 0,
         PATROL,
         CHASE,
         RUN,
@@ -105,7 +105,7 @@ public class EnemyControl : CharaControl
         base.Update();
         switch (state)
         {
-            case ENEMY_STATE.NONE:
+            case ENEMY_STATE.DEAD:
                 agent.isStopped = true;
                 break;
             case ENEMY_STATE.PATROL:
@@ -185,8 +185,9 @@ public class EnemyControl : CharaControl
                     particle.Stop();
                 }
                 break;
+
             default:
-                state = ENEMY_STATE.NONE;
+                state = ENEMY_STATE.DEAD;
                 break;
         }
     }
@@ -266,5 +267,24 @@ public class EnemyControl : CharaControl
         state = ENEMY_STATE.CHARGE;
         count = 0f;
         particle.Play();
+    }
+
+    public override void Dead()
+    {
+        healthState = HEALTH_STATE.DEAD;
+        state = ENEMY_STATE.DEAD;
+        var colorOverLifetime = particle.colorOverLifetime;
+        var gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(new Color32(0, 128, 255, 255), 0.0f), new GradientColorKey(Color.white, 1.0f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(1.0f, 0.72f), new GradientAlphaKey(0.0f, 1.0f) }
+            );
+        colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
+        particle.Play();
+    }
+
+    public override void Destroy()
+    {
+        Destroy(gameObject);
     }
 }
