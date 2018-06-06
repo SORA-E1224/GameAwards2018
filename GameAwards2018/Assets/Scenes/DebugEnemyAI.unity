@@ -21403,6 +21403,11 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 73d3182f2ceb62f48b8ab3173dc89e20, type: 2}
   m_IsPrefabParent: 0
+--- !u!23 &638176650 stripped
+MeshRenderer:
+  m_PrefabParentObject: {fileID: 23111755250171220, guid: 1126c345e13163c4b9a3d8a74065c99d,
+    type: 2}
+  m_PrefabInternal: {fileID: 738075503}
 --- !u!4 &639106972 stripped
 Transform:
   m_PrefabParentObject: {fileID: 4923030476475462, guid: a0b93992670ed0c4da3423ddf74ceefb,
@@ -24760,6 +24765,11 @@ Prefab:
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 114152445892608174, guid: 1126c345e13163c4b9a3d8a74065c99d,
+        type: 2}
+      propertyPath: renderer
+      value: 
+      objectReference: {fileID: 638176650}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 1126c345e13163c4b9a3d8a74065c99d, type: 2}
   m_IsPrefabParent: 0

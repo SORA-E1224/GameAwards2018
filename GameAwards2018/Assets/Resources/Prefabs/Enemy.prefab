@@ -246,7 +246,7 @@ MeshRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1244985104605190}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -290,7 +290,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: f8af10ae2c674e569782e57b09c76a13, type: 2}
+  - {fileID: 2100000, guid: 1ff6c1f66d8566d4aa39d02483a2d96e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -316,7 +316,7 @@ MeshRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1908839120012818}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -430,8 +430,11 @@ MonoBehaviour:
   healthState: 0
   StartHealthState: 0
   ImmunityTime: 5
-  particle: {fileID: 198844068582567354}
+  renderer: {fileID: 23571012066091240}
   ChargeTime: 5
+  DeadTime: 5
+  particle: {fileID: 198844068582567354}
+  IsVisibility: 0
   visionDesc:
     Visibility: 10
     Angle: 60
@@ -443,7 +446,6 @@ MonoBehaviour:
   mask:
     serializedVersion: 2
     m_Bits: 1025
-  IsVisibility: 0
 --- !u!114 &114326209788470090
 MonoBehaviour:
   m_ObjectHideFlags: 1

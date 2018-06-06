@@ -1,5 +1,6 @@
 ﻿Shader "Custom/CommonColor" {
 	Properties{
+		_Color("Color",Color) = (1,1,1,1)
 		_MainTex("Texture", 2D) = "white" {}
 		_Density("Density", Range(2,50)) = 30
 	}
@@ -7,37 +8,38 @@
 		{
 			Tags
 			{
-				"RenderType" = "Opaque"
+				"Queue" = "Transparent"
+				"RenderType" = "Transparent"
 			}
 			LOD 200
 
+			Pass
+			{
+				ZWrite ON
+				ColorMask 0
+			}
+
 			CGPROGRAM
-			#pragma surface surf Lambert vertex:vert
+			#pragma surface surf Standard fullforwardshadows alpha:fade
 			#pragma target 4.0
 
 			struct Input {
-				float4 vertexColor;
 				float2 uv_MainTex;
 			};
 
 			float _Density;
 			sampler2D _MainTex;
-			float4 _Diffuse;
+			float4 _Color;
 
-			void vert(inout appdata_full v, out Input o)
+			void surf(Input IN, inout SurfaceOutputStandard o)
 			{
-				UNITY_INITIALIZE_OUTPUT(Input, o);
-				o.vertexColor = v.color;
-			}
-
-			void surf(Input IN, inout SurfaceOutput o)
-			{
-				fixed4 color = tex2D(_MainTex, IN.uv_MainTex) * IN.vertexColor;
+				fixed4 color = tex2D(_MainTex, IN.uv_MainTex) * _Color;
 				float2 c = IN.uv_MainTex *_Density;
 				c = floor(c) / 2;
 				float checker = frac(c.x + c.y) * 2;
-				color *= checker;
-				o.Albedo = color;
+				color.rgb *= checker;
+				o.Albedo = color.rgb;
+				o.Alpha = color.a;
 			}
 
 			ENDCG

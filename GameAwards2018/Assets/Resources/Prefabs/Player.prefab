@@ -311,15 +311,17 @@ MonoBehaviour:
   healthState: 0
   StartHealthState: 2
   ImmunityTime: 5
+  renderer: {fileID: 0}
+  ChargeTime: 5
+  DeadTime: 5
+  particle: {fileID: 198684533117403150}
+  IsVisibility: 0
   MoveDesc:
     WalkSpeed: 6
     RunSpeed: 10
     FallRate: 0.1
   RotDesc:
     Speed: 180
-  particle: {fileID: 198684533117403150}
-  ChargeTime: 5
-  IsVisibility: 0
 --- !u!114 &114417333279311374
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -5,7 +5,6 @@ using TMPro;
 public class TagControl : MonoBehaviour
 {
     List<GameObject> playerList = new List<GameObject>();
-    List<int> deadList = new List<int>();
     private int targetCamera = 0;
     private bool trigger;
 
@@ -52,14 +51,15 @@ public class TagControl : MonoBehaviour
             {
                 time = DeadTime;
                 IsCycle = false;
-                for (int i = 0; i < playerList.Count; i++)
+                for (int i = 0; i < playerList.Count;)
                 {
                     CharaControl charaControl = playerList[i].GetComponent<CharaControl>();
                     if (charaControl.healthState == CharaControl.HEALTH_STATE.OUTBREAK)
                     {
                         charaControl.Dead();
-                        deadList.Add(i);
+                        playerList.RemoveAt(i);
                     }
+                    i++;
                 }
             }
             string timeStr;
@@ -83,15 +83,6 @@ public class TagControl : MonoBehaviour
             {
                 time = CycleTime;
                 IsCycle = true;
-                int deadCount = 0;
-                foreach (var i in deadList)
-                {
-                    CharaControl charaControl = playerList[i - deadCount].GetComponent<CharaControl>();
-                    charaControl.Destroy();
-                    playerList.RemoveAt(i - deadCount);
-                    deadCount++;
-                }
-                deadList.Clear();
 
                 System.Random rand = new System.Random();
                 CharaControl nextOutbreakChara = playerList[rand.Next(playerList.Count)].GetComponent<CharaControl>();

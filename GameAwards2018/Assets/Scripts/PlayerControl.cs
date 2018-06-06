@@ -38,13 +38,6 @@ public class PlayerControl : CharaControl
     private bool IsActionTrigger = false;
     private bool IsCharge = false;
     private float chargeCount = 0f;
-    [SerializeField]
-    ParticleSystem particle;
-    [SerializeField, Range(0f, 100f)]
-    float ChargeTime = 0f;
-
-    [SerializeField]
-    bool IsVisibility = false;
 
     // Use this for initialization
     protected override void Start()
@@ -57,6 +50,9 @@ public class PlayerControl : CharaControl
 
         GameObject touchField = transform.Find("TouchField").gameObject;
         touchField.GetComponent<MeshRenderer>().enabled = IsVisibility;
+
+        Material mat = renderer.material;
+        mat.color = Color.green;
 
         SceneController.WriteDebugTextEvent += delegate (object sender, EventArgs e)
         {
@@ -78,11 +74,27 @@ public class PlayerControl : CharaControl
             IsActionTrigger = true;
         }
 
+        if (healthState == HEALTH_STATE.DEAD)
+        {
+            chargeCount += Time.deltaTime;
+            Material mat = renderer.material;
+            mat.color = Color.Lerp(Color.green, new Color(0f, 1f, 0f, 0f), chargeCount / DeadTime);
+            if (chargeCount > DeadTime)
+            {
+                chargeCount = 0f;
+                Destroy(gameObject);
+            }
+            return;
+        }
+
         if (IsCharge)
         {
             chargeCount += Time.deltaTime;
+            Material mat = renderer.material;
+            mat.color = Color.Lerp(Color.yellow, Color.green, chargeCount / ChargeTime);
             if (chargeCount > ChargeTime)
             {
+                mat.color = Color.green;
                 chargeCount = 0f;
                 IsCharge = false;
                 particle.Stop();
@@ -187,6 +199,8 @@ public class PlayerControl : CharaControl
         {
             if (!IsActionTrigger)
             {
+                Material mat = renderer.material;
+                mat.color = Color.yellow;
                 charaControl.Caught();
                 healthState = HEALTH_STATE.IMMUNITY;
                 IsActionTrigger = true;

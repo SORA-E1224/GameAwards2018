@@ -20,6 +20,21 @@ public abstract class CharaControl : MonoBehaviour
     [SerializeField, Range(0f, 100f)]
     private float ImmunityTime = 0f;
 
+    [SerializeField]
+    protected MeshRenderer renderer;
+
+    [SerializeField, Range(1f, 100f)]
+    protected float ChargeTime = 1f;
+
+    [SerializeField, Range(1f, 100f)]
+    protected float DeadTime = 1f;
+
+    [SerializeField]
+    protected ParticleSystem particle;
+
+    [SerializeField]
+    protected bool IsVisibility = false;
+
     // Use this for initialization
     protected virtual void Start()
     {

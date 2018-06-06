@@ -21,12 +21,6 @@ public class EnemyControl : CharaControl
     int targetIndex;
     float count;
 
-    [SerializeField]
-    ParticleSystem particle;
-
-    [SerializeField]
-    float ChargeTime = 0f;
-
     [System.Serializable]
     class VISION_DESC
     {
@@ -50,13 +44,9 @@ public class EnemyControl : CharaControl
     [SerializeField]
     LayerMask mask;
 
-    [SerializeField]
-    bool IsVisibility = false;
 
     private void OnValidate()
     {
-        ChargeTime = Mathf.Max(0f, ChargeTime);
-
         if (visionDesc.Field)
         {
             visionDesc.Visibility = Mathf.Max(0f, visionDesc.Visibility);
@@ -91,6 +81,9 @@ public class EnemyControl : CharaControl
         visionDesc.Field.GetComponent<MeshRenderer>().enabled = IsVisibility;
         hearingDesc.Field.GetComponent<MeshRenderer>().enabled = IsVisibility;
 
+        Material mat = renderer.material;
+        mat.color = Color.yellow;
+
         SceneController.WriteDebugTextEvent += delegate (object sender, EventArgs e)
         {
             SceneController.WriteLineDebugText("***EnemyData***");
@@ -103,10 +96,19 @@ public class EnemyControl : CharaControl
     protected override void Update()
     {
         base.Update();
+        Material mat = renderer.material;
         switch (state)
         {
             case ENEMY_STATE.DEAD:
                 agent.isStopped = true;
+                count += Time.deltaTime;
+                mat.color = Color.Lerp(Color.green, new Color(0f, 1f, 0f, 0f), count / DeadTime);
+                if (count > DeadTime)
+                {
+                    count = 0f;
+                    Destroy(gameObject);
+                    return;
+                }
                 break;
             case ENEMY_STATE.PATROL:
                 Vector3 dist = markers[targetIndex].transform.position - transform.position;
@@ -120,6 +122,7 @@ public class EnemyControl : CharaControl
             case ENEMY_STATE.CHASE:
                 if (!chaseObj)
                 {
+                    state = ENEMY_STATE.PATROL;
                     break;
                 }
                 agent.SetDestination(chaseObj.transform.position);
@@ -151,6 +154,11 @@ public class EnemyControl : CharaControl
                 }
                 break;
             case ENEMY_STATE.RUN:
+                if (!chaseObj)
+                {
+                    state = ENEMY_STATE.PATROL;
+                    break;
+                }
                 Vector3 markerDist = markers[targetIndex].transform.position - transform.position;
                 if (markerDist.magnitude < 1.0f)
                 {
@@ -177,9 +185,11 @@ public class EnemyControl : CharaControl
             case ENEMY_STATE.CHARGE:
                 agent.isStopped = true;
                 count += Time.deltaTime;
+                mat.color = Color.Lerp(Color.yellow, Color.green, count / ChargeTime);
                 if (count > ChargeTime)
                 {
                     count = 0f;
+                    mat.color = Color.green;
                     state = ENEMY_STATE.PATROL;
                     agent.isStopped = false;
                     particle.Stop();
