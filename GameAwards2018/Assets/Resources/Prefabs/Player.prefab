@@ -311,7 +311,7 @@ MonoBehaviour:
   healthState: 0
   StartHealthState: 2
   ImmunityTime: 5
-  renderer: {fileID: 0}
+  renderer: {fileID: 23111755250171220}
   ChargeTime: 5
   DeadTime: 5
   particle: {fileID: 198684533117403150}

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using TMPro;
 
 public class TagControl : MonoBehaviour
@@ -26,15 +27,25 @@ public class TagControl : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        GameObject[] searchList = GameObject.FindGameObjectsWithTag("Player");
-        playerList.AddRange(searchList);
-        for (int i = 0; i < playerList.Count; i++)
+        GameObject[] respawnList = GameObject.FindGameObjectsWithTag("Respawn");
+        GameObject player = Instantiate(Resources.Load("Prefabs/Player")) as GameObject;
+        System.Random rand = new System.Random();
+        int playerRespawnNum = rand.Next(respawnList.Length);
+        player.transform.position = respawnList[playerRespawnNum].transform.position;
+        player.transform.localEulerAngles = new Vector3(0f, Mathf.Atan2(player.transform.position.x, player.transform.position.z) * Mathf.Rad2Deg + 180f, 0f);
+        playerList.Add(player);
+        targetCamera = 0;
+        for (int i = 0; i < respawnList.Length; i++)
         {
-            if (playerList[i].GetComponentInChildren<Camera>().depth == 0)
+            if (i == playerRespawnNum)
             {
-                targetCamera = i;
-                return;
+                continue;
             }
+            GameObject enemy = null;
+            enemy = Instantiate(Resources.Load("Prefabs/Enemy")) as GameObject;
+            enemy.GetComponent<NavMeshAgent>().Warp(respawnList[i].transform.position);
+            enemy.transform.localEulerAngles = new Vector3(0f, Mathf.Atan2(enemy.transform.position.x, enemy.transform.position.z) * Mathf.Rad2Deg + 180f, 0f);
+            playerList.Add(enemy);
         }
         trigger = false;
         IsCycle = true;

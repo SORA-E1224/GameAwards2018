@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\GameMainManager.cs" />
     <Compile Include="Assets\Scripts\MarkerControl.cs" />
     <Compile Include="Assets\Scripts\PlayerControl.cs" />
+    <Compile Include="Assets\Scripts\RespawnMarkerControl.cs" />
     <Compile Include="Assets\Scripts\SceneController.cs" />
     <Compile Include="Assets\Scripts\TagControl.cs" />
     <Compile Include="Assets\Scripts\TitleManager.cs" />
