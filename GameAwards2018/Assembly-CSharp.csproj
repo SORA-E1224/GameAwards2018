@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\CharaControl.cs" />
+    <Compile Include="Assets\Scripts\Colors.cs" />
     <Compile Include="Assets\Scripts\DoorControl.cs" />
     <Compile Include="Assets\Scripts\EnemyControl.cs" />
     <Compile Include="Assets\Scripts\EnemyVisionScript.cs" />

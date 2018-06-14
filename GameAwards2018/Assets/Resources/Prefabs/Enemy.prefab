@@ -433,6 +433,18 @@ MonoBehaviour:
   renderer: {fileID: 23571012066091240}
   ChargeTime: 5
   DeadTime: 5
+  RecoverTime: 0
+  MoveDesc:
+    HealthWalkSpeed: 4
+    HealthRunSpeed: 8
+    OutbreakWalkSpeed: 6
+    OutbreakRunSpeed: 10
+    HealthStamina: 100
+    OutbreakStamina: 150
+    UseStaminaPoints: 50
+    CureStaminaPoints: 25
+  RotDesc:
+    Speed: 180
   particle: {fileID: 198844068582567354}
   IsVisibility: 0
   visionDesc:

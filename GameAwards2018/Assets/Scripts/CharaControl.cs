@@ -29,17 +29,88 @@ public abstract class CharaControl : MonoBehaviour
     [SerializeField, Range(1f, 100f)]
     protected float DeadTime = 1f;
 
+    [SerializeField, Range(0f, 5f)]
+    protected float RecoverTime = 0f;
+
+    [System.Serializable]
+    public class MOVE_DESC
+    {
+        public float HealthWalkSpeed;
+        public float HealthRunSpeed;
+
+        public float OutbreakWalkSpeed;
+        public float OutbreakRunSpeed;
+
+        public float HealthStamina;
+        public float OutbreakStamina;
+
+        public float UseStaminaPoints;
+        public float CureStaminaPoints;
+    }
+
+    [SerializeField]
+    protected MOVE_DESC MoveDesc;
+    protected float MaxWalkSpeed;
+    protected float MaxRunSpeed;
+    protected float MaxStamina;
+
+    protected float stamina;
+
+    [System.Serializable]
+    public class ROTATE_DESC
+    {
+        public float Speed;
+    }
+
+    [SerializeField]
+    protected ROTATE_DESC RotDesc;
+
     [SerializeField]
     protected ParticleSystem particle;
 
     [SerializeField]
     protected bool IsVisibility = false;
 
+    private void OnValidate()
+    {
+        MoveDesc.HealthRunSpeed = Mathf.Max(0.0f, MoveDesc.HealthRunSpeed);
+        MoveDesc.HealthWalkSpeed = Mathf.Max(0.0f, Mathf.Min(MoveDesc.HealthWalkSpeed, MoveDesc.HealthRunSpeed));
+        MoveDesc.OutbreakRunSpeed = Mathf.Max(0.0f, MoveDesc.OutbreakRunSpeed);
+        MoveDesc.OutbreakWalkSpeed = Mathf.Max(0.0f, Mathf.Min(MoveDesc.OutbreakWalkSpeed, MoveDesc.OutbreakRunSpeed));
+        MoveDesc.HealthStamina = Mathf.Max(0f, MoveDesc.HealthStamina);
+        MoveDesc.OutbreakStamina = Mathf.Max(0f, MoveDesc.OutbreakStamina);
+        MoveDesc.UseStaminaPoints = Mathf.Max(0f, MoveDesc.UseStaminaPoints);
+        MoveDesc.CureStaminaPoints = Mathf.Max(0f, MoveDesc.CureStaminaPoints);
+
+        RotDesc.Speed = Mathf.Max(0.0f, RotDesc.Speed);
+
+        RecoverTime = Mathf.Max(Mathf.Epsilon, RecoverTime);
+    }
+
     // Use this for initialization
     protected virtual void Start()
     {
         healthCount = 0f;
         healthState = StartHealthState;
+        switch (healthState)
+        {
+            case HEALTH_STATE.HEALTH:
+                MaxWalkSpeed = MoveDesc.HealthWalkSpeed;
+                MaxRunSpeed = MoveDesc.HealthRunSpeed;
+                MaxStamina = MoveDesc.HealthStamina;
+                break;
+            case HEALTH_STATE.OUTBREAK:
+                MaxWalkSpeed = MoveDesc.OutbreakWalkSpeed;
+                MaxRunSpeed = MoveDesc.OutbreakRunSpeed;
+                MaxStamina = MoveDesc.OutbreakStamina;
+                break;
+            default:
+                MaxWalkSpeed = MoveDesc.HealthWalkSpeed;
+                MaxRunSpeed = MoveDesc.HealthRunSpeed;
+                MaxStamina = MoveDesc.HealthStamina;
+                break;
+        }
+        stamina = MaxStamina;
     }
 
     protected virtual void Update()
@@ -61,5 +132,4 @@ public abstract class CharaControl : MonoBehaviour
 
     public abstract void Dead();
 
-    public abstract void Destroy();
 }

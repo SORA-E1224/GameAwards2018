@@ -1,43 +1,22 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System;
 
 public class PlayerControl : CharaControl
 {
-    [System.Serializable]
-    class MOVE_DESC
-    {
-        public float WalkSpeed;
-        public float RunSpeed;
-        public float FallRate;
-    }
-
-    [SerializeField]
-    private MOVE_DESC MoveDesc;
-
-    [System.Serializable]
-    class ROTATE_DESC
-    {
-        public float Speed;
-    }
-
-    [SerializeField]
-    private ROTATE_DESC RotDesc;
-
     private new CharacterController characterController;
-
-    private void OnValidate()
-    {
-        MoveDesc.RunSpeed = Mathf.Max(0.0f, MoveDesc.RunSpeed);
-        MoveDesc.WalkSpeed = Mathf.Max(0.0f, Mathf.Min(MoveDesc.WalkSpeed, MoveDesc.RunSpeed));
-        MoveDesc.FallRate = Mathf.Max(0.0f, MoveDesc.FallRate);
-        MoveDesc.FallRate = Mathf.Min(1.0f, MoveDesc.FallRate);
-
-        RotDesc.Speed = Mathf.Max(0.0f, RotDesc.Speed);
-    }
 
     private bool IsActionTrigger = false;
     private bool IsCharge = false;
-    private float chargeCount = 0f;
+    private bool IsRecover = false;
+    private bool UnableRun = false;
+    private float count = 0f;
+
+    private float CaughtStaminaBuff = 0f;
+
+    [SerializeField]
+    Slider staminaGage;
+    Image gageColor;
 
     // Use this for initialization
     protected override void Start()
@@ -46,6 +25,8 @@ public class PlayerControl : CharaControl
         healthState = HEALTH_STATE.OUTBREAK;
         IsActionTrigger = false;
         IsCharge = false;
+        IsRecover = false;
+        count = 0f;
         characterController = GetComponent<CharacterController>();
 
         GameObject touchField = transform.Find("TouchField").gameObject;
@@ -54,10 +35,17 @@ public class PlayerControl : CharaControl
         Material mat = renderer.material;
         mat.color = Color.green;
 
+        RectTransform rectTrans = staminaGage.GetComponent<RectTransform>();
+        rectTrans.sizeDelta = new Vector2(Screen.width * MaxStamina / 4f / 100f, 120f);
+        CaughtStaminaBuff = 0f;
+        gageColor = staminaGage.gameObject.transform.Find("Fill Area").GetComponentInChildren<Image>();
+        gageColor.color = Colors.Aqua;
+
         SceneController.WriteDebugTextEvent += delegate (object sender, EventArgs e)
         {
             SceneController.WriteLineDebugText("***PlayerData***");
             SceneController.WriteLineDebugText(string.Format("Health : {0}", healthState));
+            SceneController.WriteLineDebugText(string.Format("Stamina : {0}", stamina));
         };
     }
 
@@ -76,28 +64,57 @@ public class PlayerControl : CharaControl
 
         if (healthState == HEALTH_STATE.DEAD)
         {
-            chargeCount += Time.deltaTime;
+            count += Time.deltaTime;
             Material mat = renderer.material;
-            mat.color = Color.Lerp(Color.green, new Color(0f, 1f, 0f, 0f), chargeCount / DeadTime);
-            if (chargeCount > DeadTime)
+            mat.color = Color.Lerp(Color.green, new Color(0f, 1f, 0f, 0f), count / DeadTime);
+            if (count > DeadTime)
             {
-                chargeCount = 0f;
+                count = 0f;
                 Destroy(gameObject);
+            }
+            return;
+        }
+
+        if (IsRecover)
+        {
+            count += Time.deltaTime;
+            Material mat = renderer.material;
+            mat.color = Color.Lerp(Color.green, Color.yellow, count / RecoverTime);
+            float gageWidth = Mathf.Lerp(MoveDesc.OutbreakStamina, MoveDesc.HealthStamina, count / RecoverTime);
+            if (stamina > gageWidth)
+            {
+                stamina = gageWidth;
+            }
+            RectTransform rectTrans = staminaGage.GetComponent<RectTransform>();
+            rectTrans.sizeDelta = new Vector2(Screen.width * gageWidth / 4f / 100f, 120f);
+            if (count > RecoverTime)
+            {
+                count = 0f;
+                IsRecover = false;
+                mat.color = Color.yellow;
+                rectTrans.sizeDelta = new Vector2(Screen.width * MaxStamina / 4f / 100f, 120f);
             }
             return;
         }
 
         if (IsCharge)
         {
-            chargeCount += Time.deltaTime;
+            count += Time.deltaTime;
             Material mat = renderer.material;
-            mat.color = Color.Lerp(Color.yellow, Color.green, chargeCount / ChargeTime);
-            if (chargeCount > ChargeTime)
+            mat.color = Color.Lerp(Color.yellow, Color.green, count / ChargeTime);
+            float gageWidth = Mathf.Lerp(MoveDesc.HealthStamina, MoveDesc.OutbreakStamina, count / ChargeTime);
+            staminaGage.value = Mathf.Lerp(CaughtStaminaBuff, 1.0f, count / ChargeTime);
+            RectTransform rectTrans = staminaGage.GetComponent<RectTransform>();
+            rectTrans.sizeDelta = new Vector2(Screen.width * gageWidth / 4f / 100f, 120f);
+            if (count > ChargeTime)
             {
+                staminaGage.value = 1f;
+                CaughtStaminaBuff = 0f;
                 mat.color = Color.green;
-                chargeCount = 0f;
+                count = 0f;
                 IsCharge = false;
                 particle.Stop();
+                rectTrans.sizeDelta = new Vector2(Screen.width * MaxStamina / 4f / 100f, 120f);
             }
             return;
         }
@@ -109,13 +126,45 @@ public class PlayerControl : CharaControl
     void MoveCalc()
     {
         float Speed = 0;
-        if (Input.GetAxis("RunTrigger") < 0.8f)
+        bool IsRun = false;
+        if (Input.GetAxis("RunTrigger") > 0.8f && !UnableRun && characterController.velocity.magnitude > Mathf.Epsilon)
         {
-            Speed = MoveDesc.WalkSpeed;
+            stamina -= MoveDesc.UseStaminaPoints * Time.deltaTime;
+            if (stamina < 0)
+            {
+                stamina = 0;
+                UnableRun = true;
+                gageColor.color = Colors.IndianRed;
+            }
+            else
+            {
+                IsRun = true;
+            }
         }
         else
         {
-            Speed = MoveDesc.RunSpeed;
+            stamina += MoveDesc.CureStaminaPoints * Time.deltaTime;
+            if (stamina > MaxStamina)
+            {
+                stamina = MaxStamina;
+                UnableRun = false;
+                gageColor.color = Colors.Aqua;
+
+            }
+        }
+
+        if (staminaGage)
+        {
+            staminaGage.value = stamina / MaxStamina;
+        }
+
+        if (IsRun)
+        {
+            Speed = MaxRunSpeed;
+        }
+        else
+        {
+            Speed = MaxWalkSpeed;
         }
 
         float inputX = Input.GetAxis("LeftStickX");
@@ -204,6 +253,11 @@ public class PlayerControl : CharaControl
                 charaControl.Caught();
                 healthState = HEALTH_STATE.IMMUNITY;
                 IsActionTrigger = true;
+                MaxStamina = MoveDesc.HealthStamina;
+                MaxWalkSpeed = MoveDesc.HealthWalkSpeed;
+                MaxRunSpeed = MoveDesc.HealthRunSpeed;
+                IsRecover = true;
+                count = 0f;
             }
         }
     }
@@ -217,8 +271,13 @@ public class PlayerControl : CharaControl
 
         healthState = HEALTH_STATE.OUTBREAK;
         IsCharge = true;
-        chargeCount = 0f;
+        count = 0f;
         particle.Play();
+        CaughtStaminaBuff = stamina / MaxStamina;
+        MaxStamina = MoveDesc.OutbreakStamina;
+        MaxWalkSpeed = MoveDesc.OutbreakWalkSpeed;
+        MaxRunSpeed = MoveDesc.OutbreakRunSpeed;
+        stamina = MaxStamina;
     }
 
     public override void Dead()
@@ -234,8 +293,4 @@ public class PlayerControl : CharaControl
         particle.Play();
     }
 
-    public override void Destroy()
-    {
-        Destroy(gameObject);
-    }
 }

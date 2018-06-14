@@ -5,6 +5,7 @@ using UnityEngine.AI;
 public class EnemyControl : CharaControl
 {
     private NavMeshAgent agent;
+    private bool UnableRun = false;
 
     enum ENEMY_STATE
     {
@@ -12,7 +13,8 @@ public class EnemyControl : CharaControl
         PATROL,
         CHASE,
         RUN,
-        CHARGE
+        CHARGE,
+        RECOVER
     }
 
     ENEMY_STATE state;
@@ -77,131 +79,25 @@ public class EnemyControl : CharaControl
         System.Random rand = new System.Random();
         targetIndex = rand.Next(markers.Length);
         agent.SetDestination(markers[targetIndex].transform.position);
-
+        agent.speed = MaxWalkSpeed;
+        agent.angularSpeed = RotDesc.Speed;
+        
         visionDesc.Field.GetComponent<MeshRenderer>().enabled = IsVisibility;
         hearingDesc.Field.GetComponent<MeshRenderer>().enabled = IsVisibility;
 
         Material mat = renderer.material;
         mat.color = Color.yellow;
-
-        SceneController.WriteDebugTextEvent += delegate (object sender, EventArgs e)
-        {
-            SceneController.WriteLineDebugText("***EnemyData***");
-            SceneController.WriteLineDebugText(string.Format("Health : {0}", healthState));
-            SceneController.WriteLineDebugText(string.Format("EnemyState : {0}", state));
-        };
+        UnableRun = false;
     }
 
     // Update is called once per frame
     protected override void Update()
     {
         base.Update();
-        Material mat = renderer.material;
-        switch (state)
-        {
-            case ENEMY_STATE.DEAD:
-                agent.isStopped = true;
-                count += Time.deltaTime;
-                mat.color = Color.Lerp(Color.green, new Color(0f, 1f, 0f, 0f), count / DeadTime);
-                if (count > DeadTime)
-                {
-                    count = 0f;
-                    Destroy(gameObject);
-                    return;
-                }
-                break;
-            case ENEMY_STATE.PATROL:
-                Vector3 dist = markers[targetIndex].transform.position - transform.position;
-                if (dist.magnitude < 1.0f)
-                {
-                    System.Random rand = new System.Random();
-                    targetIndex = rand.Next(markers.Length);
-                    agent.SetDestination(markers[targetIndex].transform.position);
-                }
-                break;
-            case ENEMY_STATE.CHASE:
-                if (!chaseObj)
-                {
-                    state = ENEMY_STATE.PATROL;
-                    break;
-                }
-                agent.SetDestination(chaseObj.transform.position);
-                Vector3 runnerDist = chaseObj.transform.position - transform.position;
-                if (runnerDist.magnitude < 2.0f)
-                {
-                    CharaControl charaControl = chaseObj.GetComponent<CharaControl>();
-                    if (charaControl.healthState == HEALTH_STATE.HEALTH)
-                    {
-                        charaControl.Caught();
-                        state = ENEMY_STATE.RUN;
-                        healthState = HEALTH_STATE.IMMUNITY;
-                    }
-                }
-                if (runnerDist.magnitude > hearingDesc.Radius)
-                {
-                    count += Time.deltaTime;
-                    if (count > visionDesc.DetectTime)
-                    {
-                        count = 0f;
-                        state = ENEMY_STATE.PATROL;
-                        agent.SetDestination(markers[targetIndex].transform.position);
-                        chaseObj = null;
-                    }
-                }
-                else
-                {
-                    count = 0f;
-                }
-                break;
-            case ENEMY_STATE.RUN:
-                if (!chaseObj)
-                {
-                    state = ENEMY_STATE.PATROL;
-                    break;
-                }
-                Vector3 markerDist = markers[targetIndex].transform.position - transform.position;
-                if (markerDist.magnitude < 1.0f)
-                {
-                    SearchEscapeMarker();
-                }
-
-                Vector3 chaserDist = chaseObj.transform.position - transform.position;
-                if (chaserDist.magnitude > hearingDesc.Radius)
-                {
-                    count += Time.deltaTime;
-                    if (count > visionDesc.DetectTime)
-                    {
-                        count = 0f;
-                        state = ENEMY_STATE.PATROL;
-                        chaseObj = null;
-                    }
-                }
-                else
-                {
-                    count = 0f;
-                }
-
-                break;
-            case ENEMY_STATE.CHARGE:
-                agent.isStopped = true;
-                count += Time.deltaTime;
-                mat.color = Color.Lerp(Color.yellow, Color.green, count / ChargeTime);
-                if (count > ChargeTime)
-                {
-                    count = 0f;
-                    mat.color = Color.green;
-                    state = ENEMY_STATE.PATROL;
-                    agent.isStopped = false;
-                    particle.Stop();
-                }
-                break;
-
-            default:
-                state = ENEMY_STATE.DEAD;
-                break;
-        }
+        AIProcessing();
     }
 
+    // Discovering Player Func
     public void DiscoverPlayer(GameObject player)
     {
         MeshCollider col = visionDesc.Field.GetComponent<MeshCollider>();
@@ -238,6 +134,7 @@ public class EnemyControl : CharaControl
         }
     }
 
+    // Search the farthest Marker from Chaser Func
     private void SearchEscapeMarker()
     {
         Vector3 OBDir = chaseObj.transform.position - transform.position;
@@ -258,6 +155,7 @@ public class EnemyControl : CharaControl
         agent.SetDestination(markers[targetIndex].transform.position);
     }
 
+    // OnTrigger Func
     private void OnTriggerStay(Collider other)
     {
         if (other.tag == "Door")
@@ -266,6 +164,7 @@ public class EnemyControl : CharaControl
         }
     }
 
+    // Caught by Outbreak Func
     public override void Caught()
     {
         if (healthState != HEALTH_STATE.HEALTH)
@@ -277,8 +176,14 @@ public class EnemyControl : CharaControl
         state = ENEMY_STATE.CHARGE;
         count = 0f;
         particle.Play();
+        MaxStamina = MoveDesc.OutbreakStamina;
+        MaxWalkSpeed = MoveDesc.OutbreakWalkSpeed;
+        MaxRunSpeed = MoveDesc.OutbreakRunSpeed;
+        stamina = MaxStamina;
+        agent.speed = MaxWalkSpeed;
     }
 
+    // Dead Func
     public override void Dead()
     {
         healthState = HEALTH_STATE.DEAD;
@@ -293,8 +198,245 @@ public class EnemyControl : CharaControl
         particle.Play();
     }
 
-    public override void Destroy()
+    // CPU AI Processing Func
+    void AIProcessing()
     {
-        Destroy(gameObject);
+        switch (state)
+        {
+            case ENEMY_STATE.DEAD:
+                if (Dying())
+                {
+                    return;
+                }
+                break;
+            case ENEMY_STATE.PATROL:
+                Patrol();
+                break;
+            case ENEMY_STATE.CHASE:
+                Chase();
+                break;
+            case ENEMY_STATE.RUN:
+                Run();
+                break;
+            case ENEMY_STATE.CHARGE:
+                Charge();
+                break;
+            case ENEMY_STATE.RECOVER:
+                Recover();
+                break;
+            default:
+                state = ENEMY_STATE.DEAD;
+                break;
+        }
+    }
+
+    // Dying Func
+    bool Dying()
+    {
+        Material mat = renderer.material;
+        agent.isStopped = true;
+        count += Time.deltaTime;
+        mat.color = Color.Lerp(Color.green, new Color(0f, 1f, 0f, 0f), count / DeadTime);
+        if (count > DeadTime)
+        {
+            count = 0f;
+            Destroy(gameObject);
+            return true;
+        }
+        return false;
+    }
+
+    // Patrol Func
+    void Patrol()
+    {
+        stamina += MoveDesc.CureStaminaPoints * Time.deltaTime;
+        if (stamina > MaxStamina)
+        {
+            stamina = MaxStamina;
+            UnableRun = false;
+        }
+        if (agent.remainingDistance < 1.0f)
+        {
+            System.Random rand = new System.Random();
+            targetIndex = rand.Next(markers.Length);
+            agent.SetDestination(markers[targetIndex].transform.position);
+        }
+    }
+
+    // Chase Func
+    void Chase()
+    {
+        Material mat = renderer.material;
+        if (!chaseObj)
+        {
+            state = ENEMY_STATE.PATROL;
+            return;
+        }
+        bool IsRun = false;
+        if (!UnableRun)
+        {
+            stamina -= MoveDesc.UseStaminaPoints * Time.deltaTime;
+            if (stamina < 0)
+            {
+                stamina = 0;
+                UnableRun = true;
+            }
+            else
+            {
+                IsRun = true;
+            }
+        }
+        else
+        {
+            stamina += MoveDesc.CureStaminaPoints * Time.deltaTime;
+            if (stamina > MaxStamina)
+            {
+                stamina = MaxStamina;
+                UnableRun = false;
+            }
+        }
+
+        if (IsRun)
+        {
+            agent.speed = MaxRunSpeed;
+        }
+        else
+        {
+            agent.speed = MaxWalkSpeed;
+        }
+
+        agent.SetDestination(chaseObj.transform.position);
+        // Catch Health Player
+        if (agent.remainingDistance < 2.0f)
+        {
+            CharaControl charaControl = chaseObj.GetComponent<CharaControl>();
+            if (charaControl.healthState == HEALTH_STATE.HEALTH)
+            {
+                charaControl.Caught();
+                state = ENEMY_STATE.RECOVER;
+                healthState = HEALTH_STATE.IMMUNITY;
+                mat.color = Color.yellow;
+                MaxStamina = MoveDesc.HealthStamina;
+                MaxWalkSpeed = MoveDesc.HealthWalkSpeed;
+                MaxRunSpeed = MoveDesc.HealthRunSpeed;
+                agent.speed = MaxWalkSpeed;
+            }
+        }
+        // Missing Player
+        if (agent.remainingDistance > hearingDesc.Radius)
+        {
+            count += Time.deltaTime;
+            if (count > visionDesc.DetectTime)
+            {
+                count = 0f;
+                state = ENEMY_STATE.PATROL;
+                agent.SetDestination(markers[targetIndex].transform.position);
+                chaseObj = null;
+                agent.speed = MaxWalkSpeed;
+            }
+        }
+        else
+        {
+            count = 0f;
+        }
+    }
+
+    // Run Func
+    void Run()
+    {
+        if (!chaseObj)
+        {
+            state = ENEMY_STATE.PATROL;
+            return;
+        }
+
+        bool IsRun = false;
+        if (!UnableRun)
+        {
+            stamina -= MoveDesc.UseStaminaPoints * Time.deltaTime;
+            if (stamina < 0)
+            {
+                stamina = 0;
+                UnableRun = true;
+            }
+            else
+            {
+                IsRun = true;
+            }
+        }
+        else
+        {
+            stamina += MoveDesc.CureStaminaPoints * Time.deltaTime;
+            if (stamina > MaxStamina)
+            {
+                stamina = MaxStamina;
+                UnableRun = false;
+            }
+        }
+
+        if (IsRun)
+        {
+            agent.speed = MaxRunSpeed;
+        }
+        else
+        {
+            agent.speed = MaxWalkSpeed;
+        }
+
+        if (agent.remainingDistance < 1.0f)
+        {
+            SearchEscapeMarker();
+        }
+
+        // Keep Safe Distance
+        Vector3 chaserDist = chaseObj.transform.position - transform.position;
+        if (chaserDist.magnitude > hearingDesc.Radius)
+        {
+            count += Time.deltaTime;
+            if (count > visionDesc.DetectTime)
+            {
+                count = 0f;
+                state = ENEMY_STATE.PATROL;
+                chaseObj = null;
+                agent.speed = MaxWalkSpeed;
+            }
+        }
+        else
+        {
+            count = 0f;
+        }
+    }
+
+    // Charge Func
+    void Charge()
+    {
+        Material mat = renderer.material;
+        agent.isStopped = true;
+        count += Time.deltaTime;
+        mat.color = Color.Lerp(Color.yellow, Color.green, count / ChargeTime);
+        if (count > ChargeTime)
+        {
+            count = 0f;
+            mat.color = Color.green;
+            state = ENEMY_STATE.PATROL;
+            agent.isStopped = false;
+            particle.Stop();
+        }
+    }
+
+    // Recover Func
+    void Recover()
+    {
+        Material mat = renderer.material;
+        agent.isStopped = true;
+        count += Time.deltaTime;
+        mat.color = Color.Lerp(Color.green, Color.yellow, count / RecoverTime);
+        if (count > RecoverTime)
+        {
+            count = 0f;
+            mat.color = Color.yellow;
+            state = ENEMY_STATE.PATROL;
+            agent.isStopped = false;
+        }
     }
 }
