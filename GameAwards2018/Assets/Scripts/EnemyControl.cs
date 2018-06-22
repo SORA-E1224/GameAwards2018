@@ -14,7 +14,8 @@ public class EnemyControl : CharaControl
         CHASE,
         RUN,
         CHARGE,
-        RECOVER
+        RECOVER,
+        HIDE
     }
 
     ENEMY_STATE state;
@@ -223,6 +224,9 @@ public class EnemyControl : CharaControl
                 break;
             case ENEMY_STATE.RECOVER:
                 Recover();
+                break;
+            case ENEMY_STATE.HIDE:
+                Hide();
                 break;
             default:
                 state = ENEMY_STATE.DEAD;
@@ -438,5 +442,11 @@ public class EnemyControl : CharaControl
             state = ENEMY_STATE.PATROL;
             agent.isStopped = false;
         }
+    }
+
+    // Hide Func
+    void Hide()
+    {
+
     }
 }

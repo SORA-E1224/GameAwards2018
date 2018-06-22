@@ -21,7 +21,7 @@ public abstract class CharaControl : MonoBehaviour
     private float ImmunityTime = 0f;
 
     [SerializeField]
-    protected MeshRenderer renderer;
+    protected new MeshRenderer renderer;
 
     [SerializeField, Range(1f, 100f)]
     protected float ChargeTime = 1f;

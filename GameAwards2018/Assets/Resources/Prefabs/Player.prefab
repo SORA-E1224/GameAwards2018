@@ -454,7 +454,7 @@ MonoBehaviour:
   RotDesc:
     Speed: 180
   particle: {fileID: 198684533117403150}
-  IsVisibility: 0
+  IsVisibility: 1
   staminaGage: {fileID: 114172834061935892}
 --- !u!114 &114172834061935892
 MonoBehaviour:

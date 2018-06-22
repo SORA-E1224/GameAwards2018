@@ -389,7 +389,7 @@ MeshCollider:
   m_GameObject: {fileID: 1908839120012818}
   m_Material: {fileID: 0}
   m_IsTrigger: 1
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Convex: 1
   m_CookingOptions: 14
@@ -446,7 +446,7 @@ MonoBehaviour:
   RotDesc:
     Speed: 180
   particle: {fileID: 198844068582567354}
-  IsVisibility: 0
+  IsVisibility: 1
   visionDesc:
     Visibility: 10
     Angle: 60

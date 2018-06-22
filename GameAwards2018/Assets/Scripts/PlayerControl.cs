@@ -4,7 +4,7 @@ using System;
 
 public class PlayerControl : CharaControl
 {
-    private new CharacterController characterController;
+    private CharacterController characterController;
 
     private bool IsActionTrigger = false;
     private bool IsCharge = false;
