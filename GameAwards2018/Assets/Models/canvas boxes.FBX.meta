@@ -1,0 +1,202 @@
+fileFormatVersion: 2
+guid: a86a86a063b026c4b815884305959c5a
+ModelImporter:
+  serializedVersion: 22
+  fileIDToRecycleName:
+    100000: Box
+    100002: Box 01
+    100004: Box 02
+    100006: Box 03
+    100008: Box 04
+    100010: Box 05
+    100012: Box 06
+    100014: Box 07
+    100016: Box 08
+    100018: //RootNode
+    100020: Drawers
+    100022: Magazine Box01
+    100024: Magazine Box02
+    100026: Magazine Box03
+    100028: Magazine Box04
+    100030: Magazine Box05
+    100032: Magazine Box06
+    100034: Magazine Holder
+    100036: Paper Box01
+    100038: Paper Box03
+    100040: Paper Box04
+    100042: Paper Box05
+    100044: Paper Box07
+    100046: Paper Box08
+    100048: Paper Box09
+    400000: Box
+    400002: Box 01
+    400004: Box 02
+    400006: Box 03
+    400008: Box 04
+    400010: Box 05
+    400012: Box 06
+    400014: Box 07
+    400016: Box 08
+    400018: //RootNode
+    400020: Drawers
+    400022: Magazine Box01
+    400024: Magazine Box02
+    400026: Magazine Box03
+    400028: Magazine Box04
+    400030: Magazine Box05
+    400032: Magazine Box06
+    400034: Magazine Holder
+    400036: Paper Box01
+    400038: Paper Box03
+    400040: Paper Box04
+    400042: Paper Box05
+    400044: Paper Box07
+    400046: Paper Box08
+    400048: Paper Box09
+    2100000: 'Material #36'
+    2100002: 'Material #37'
+    2100004: 'Material #35'
+    2300000: Box 01
+    2300002: Box 02
+    2300004: Box 03
+    2300006: Box 04
+    2300008: Box 05
+    2300010: Box 06
+    2300012: Box 07
+    2300014: Box 08
+    2300016: Magazine Box01
+    2300018: Magazine Box02
+    2300020: Magazine Box03
+    2300022: Magazine Box04
+    2300024: Magazine Box05
+    2300026: Magazine Box06
+    2300028: Paper Box01
+    2300030: Paper Box03
+    2300032: Paper Box04
+    2300034: Paper Box05
+    2300036: Paper Box07
+    2300038: Paper Box08
+    2300040: Paper Box09
+    3300000: Box 01
+    3300002: Box 02
+    3300004: Box 03
+    3300006: Box 04
+    3300008: Box 05
+    3300010: Box 06
+    3300012: Box 07
+    3300014: Box 08
+    3300016: Magazine Box01
+    3300018: Magazine Box02
+    3300020: Magazine Box03
+    3300022: Magazine Box04
+    3300024: Magazine Box05
+    3300026: Magazine Box06
+    3300028: Paper Box01
+    3300030: Paper Box03
+    3300032: Paper Box04
+    3300034: Paper Box05
+    3300036: Paper Box07
+    3300038: Paper Box08
+    3300040: Paper Box09
+    4300000: Magazine Box01
+    4300002: Magazine Box02
+    4300004: Magazine Box03
+    4300006: Magazine Box04
+    4300008: Magazine Box06
+    4300010: Magazine Box05
+    4300012: Box 04
+    4300014: Box 06
+    4300016: Box 05
+    4300018: Box 08
+    4300020: Box 07
+    4300022: Box 03
+    4300024: Box 01
+    4300026: Box 02
+    4300028: Paper Box03
+    4300030: Paper Box04
+    4300032: Paper Box05
+    4300034: Paper Box07
+    4300036: Paper Box08
+    4300038: Paper Box09
+    4300040: Paper Box01
+  externalObjects: {}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
