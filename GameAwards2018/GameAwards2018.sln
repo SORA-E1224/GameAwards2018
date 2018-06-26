@@ -1,16 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-<<<<<<< HEAD
 # Visual Studio 15
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAwards2018", "Assembly-CSharp.csproj", "{302DC933-CB01-C312-5A0E-F3F993EF513E}"
-EndProject
-=======
-# Visual Studio 2015
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAwards2018", "Assembly-CSharp.csproj", "{302DC933-CB01-C312-5A0E-F3F993EF513E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAwards2018", "Assembly-CSharp-Editor.csproj", "{BA95A336-6855-8618-C582-19A2C8336E68}"
 EndProject
->>>>>>> master
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,13 +15,10 @@ Global
 		{302DC933-CB01-C312-5A0E-F3F993EF513E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{302DC933-CB01-C312-5A0E-F3F993EF513E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{302DC933-CB01-C312-5A0E-F3F993EF513E}.Release|Any CPU.Build.0 = Release|Any CPU
-<<<<<<< HEAD
-=======
 		{BA95A336-6855-8618-C582-19A2C8336E68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BA95A336-6855-8618-C582-19A2C8336E68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA95A336-6855-8618-C582-19A2C8336E68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA95A336-6855-8618-C582-19A2C8336E68}.Release|Any CPU.Build.0 = Release|Any CPU
->>>>>>> master
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
