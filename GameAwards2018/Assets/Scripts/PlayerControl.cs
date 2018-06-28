@@ -32,54 +32,59 @@ public class PlayerControl : CharaControl
         GameObject touchField = transform.Find("TouchField").gameObject;
         touchField.GetComponent<MeshRenderer>().enabled = IsVisibility;
 
-        Material mat = renderer.material;
-        mat.color = Color.green;
-
         RectTransform rectTrans = staminaGage.GetComponent<RectTransform>();
         rectTrans.sizeDelta = new Vector2(Screen.width * MaxStamina / 4f / 100f, 120f);
         CaughtStaminaBuff = 0f;
         gageColor = staminaGage.gameObject.transform.Find("Fill Area").GetComponentInChildren<Image>();
         gageColor.color = Colors.Aqua;
 
-        SceneController.WriteDebugTextEvent += delegate (object sender, EventArgs e)
-        {
-            SceneController.WriteLineDebugText("***PlayerData***");
-            SceneController.WriteLineDebugText(string.Format("Health : {0}", healthState));
-            SceneController.WriteLineDebugText(string.Format("Stamina : {0}", stamina));
-        };
     }
 
     // Update is called once per frame
     protected override void Update()
     {
         base.Update();
-        if (Input.GetAxis("ActionTrigger") < 0.9f)
+
+        if (healthState == HEALTH_STATE.NONE)
         {
-            IsActionTrigger = false;
-        }
-        else
-        {
-            IsActionTrigger = true;
+            return;
         }
 
         if (healthState == HEALTH_STATE.DEAD)
         {
             count += Time.deltaTime;
             Material mat = renderer.material;
-            mat.color = Color.Lerp(Color.green, new Color(0f, 1f, 0f, 0f), count / DeadTime);
+            Color outbreakTrans = OutbreakBodyColor;
+            outbreakTrans.a = 0.0f;
+            mat.color = Color.Lerp(OutbreakBodyColor, outbreakTrans, count / DeadTime);
             if (count > DeadTime)
             {
+                healthState = HEALTH_STATE.NONE;
+                particle.Stop();
                 count = 0f;
-                Destroy(gameObject);
             }
             return;
+        }
+
+        if (tagControl.tagState != TagControl.TagState.GAME)
+        {
+            return;
+        }
+
+        if (Input.GetAxis("ActionTrigger") > 0.9f)
+        {
+            IsActionTrigger = true;
+        }
+        else
+        {
+            IsActionTrigger = false;
         }
 
         if (IsRecover)
         {
             count += Time.deltaTime;
             Material mat = renderer.material;
-            mat.color = Color.Lerp(Color.green, Color.yellow, count / RecoverTime);
+            mat.color = Color.Lerp(OutbreakBodyColor, Colors.White, count / RecoverTime);
             float gageWidth = Mathf.Lerp(MoveDesc.OutbreakStamina, MoveDesc.HealthStamina, count / RecoverTime);
             if (stamina > gageWidth)
             {
@@ -91,7 +96,7 @@ public class PlayerControl : CharaControl
             {
                 count = 0f;
                 IsRecover = false;
-                mat.color = Color.yellow;
+                mat.color = Colors.White;
                 rectTrans.sizeDelta = new Vector2(Screen.width * MaxStamina / 4f / 100f, 120f);
             }
             return;
@@ -101,7 +106,7 @@ public class PlayerControl : CharaControl
         {
             count += Time.deltaTime;
             Material mat = renderer.material;
-            mat.color = Color.Lerp(Color.yellow, Color.green, count / ChargeTime);
+            mat.color = Color.Lerp(Colors.White, OutbreakBodyColor, count / ChargeTime);
             float gageWidth = Mathf.Lerp(MoveDesc.HealthStamina, MoveDesc.OutbreakStamina, count / ChargeTime);
             staminaGage.value = Mathf.Lerp(CaughtStaminaBuff, 1.0f, count / ChargeTime);
             RectTransform rectTrans = staminaGage.GetComponent<RectTransform>();
@@ -110,7 +115,7 @@ public class PlayerControl : CharaControl
             {
                 staminaGage.value = 1f;
                 CaughtStaminaBuff = 0f;
-                mat.color = Color.green;
+                mat.color = OutbreakBodyColor;
                 count = 0f;
                 IsCharge = false;
                 particle.Stop();
@@ -118,6 +123,8 @@ public class PlayerControl : CharaControl
             }
             return;
         }
+
+
 
         Rotate();
         Move();
@@ -169,7 +176,12 @@ public class PlayerControl : CharaControl
 
         float inputX = Input.GetAxis("LeftStickX");
         float inputY = Input.GetAxis("LeftStickY");
-
+        animator.SetFloat("InputY", inputY * Speed);
+        animator.SetFloat("InputX", inputX * Speed);
+        if (inputY < 0f)
+        {
+            inputY *= 0.5f;
+        }
         Vector3 accel = Vector3.zero;
         if (Mathf.Abs(inputX) > 0.3f)
         {
@@ -179,11 +191,14 @@ public class PlayerControl : CharaControl
         {
             accel += transform.forward * inputY;
         }
+
         accel *= Speed;
         accel += Physics.gravity;
         accel *= Time.deltaTime;
 
         characterController.Move(accel);
+
+        animator.SetFloat("Speed", characterController.velocity.magnitude);
     }
 
     void Rotate()
@@ -248,8 +263,6 @@ public class PlayerControl : CharaControl
         {
             if (!IsActionTrigger)
             {
-                Material mat = renderer.material;
-                mat.color = Color.yellow;
                 charaControl.Caught();
                 healthState = HEALTH_STATE.IMMUNITY;
                 IsActionTrigger = true;
@@ -282,15 +295,7 @@ public class PlayerControl : CharaControl
 
     public override void Dead()
     {
-        healthState = HEALTH_STATE.DEAD;
-        var colorOverLifetime = particle.colorOverLifetime;
-        var gradient = new Gradient();
-        gradient.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(new Color32(0, 128, 255, 255), 0.0f), new GradientColorKey(Color.white, 1.0f) },
-            new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(1.0f, 0.72f), new GradientAlphaKey(0.0f, 1.0f) }
-            );
-        colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
-        particle.Play();
+        base.Dead();
     }
 
 }
