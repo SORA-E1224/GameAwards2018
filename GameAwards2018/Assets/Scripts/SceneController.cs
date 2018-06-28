@@ -12,8 +12,10 @@ public class SceneController : MonoBehaviour
     public enum FADE_MODE
     {
         FADEMODE_NONE = 0,
-        FADEMODE_IN = 1,
-        FADEMODE_OUT = 2
+        FADEMODE_IN,
+        FADEMODE_IN_FINISH,
+        FADEMODE_OUT,
+        FADEMODE_OUT_FINISH
     }
 
     static public FADE_MODE mode { get; private set; }
@@ -21,11 +23,11 @@ public class SceneController : MonoBehaviour
 
     [SerializeField]
     [Range(0.1f, 10.0f)]
-    private float fadeTime;
+    private float fadeTime = 1f;
     private float fadeCount;
 
     [SerializeField]
-    private Material matFade;
+    private new Material matFade;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Initialize()
@@ -106,7 +108,7 @@ public class SceneController : MonoBehaviour
             if (fadeCount < 0)
             {
                 fadeCount = 0.0f;
-                mode = FADE_MODE.FADEMODE_NONE;
+                mode = FADE_MODE.FADEMODE_IN_FINISH;
                 if (!string.IsNullOrEmpty(nextScene))
                 {
                     IsLoad = true;
@@ -119,7 +121,7 @@ public class SceneController : MonoBehaviour
             if (fadeCount > fadeTime)
             {
                 fadeCount = fadeTime;
-                mode = FADE_MODE.FADEMODE_NONE;
+                mode = FADE_MODE.FADEMODE_OUT_FINISH;
                 if (!string.IsNullOrEmpty(nextScene))
                 {
                     IsLoad = true;
@@ -162,11 +164,17 @@ public class SceneController : MonoBehaviour
         debugText += Environment.NewLine;
     }
 
+    static public bool IsFade()
+    {
+        return mode == FADE_MODE.FADEMODE_IN || mode == FADE_MODE.FADEMODE_OUT;
+    }
+
     private void OnGUI()
     {
         if (Debug.isDebugBuild)
         {
             WriteLineDebugText(string.Format("{0:F2}fps", fps));
+            WriteLineDebugText(string.Format("FADEMODE : {0}", mode));
 
             WriteDebugTextEvent(null, null);
 

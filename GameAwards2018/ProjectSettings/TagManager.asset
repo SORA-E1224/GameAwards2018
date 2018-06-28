@@ -9,6 +9,8 @@ TagManager:
   - Marker
   - EnemyVision
   - EnemyCamera
+  - Trigger
+  - SceneChanger
   layers:
   - Default
   - TransparentFX
