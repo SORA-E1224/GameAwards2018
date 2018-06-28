@@ -7,13 +7,14 @@ public abstract class CharaControl : MonoBehaviour
         HEALTH = 0,
         IMMUNITY,
         OUTBREAK,
-        DEAD
+        DEAD,
+        NONE
     }
     [HideInInspector]
     public HEALTH_STATE healthState;
 
     [SerializeField]
-    HEALTH_STATE StartHealthState = HEALTH_STATE.HEALTH;
+    public HEALTH_STATE StartHealthState = HEALTH_STATE.HEALTH;
 
     private float healthCount = 0f;
 
@@ -21,7 +22,7 @@ public abstract class CharaControl : MonoBehaviour
     private float ImmunityTime = 0f;
 
     [SerializeField]
-    protected new MeshRenderer renderer;
+    protected new Renderer renderer;
 
     [SerializeField, Range(1f, 100f)]
     protected float ChargeTime = 1f;
@@ -31,6 +32,12 @@ public abstract class CharaControl : MonoBehaviour
 
     [SerializeField, Range(0f, 5f)]
     protected float RecoverTime = 0f;
+
+    protected Color OutbreakBodyColor = Colors.ForestGreen;
+
+    [SerializeField]
+    protected Animator animator;
+    protected int animHash_Dead = 0;
 
     [System.Serializable]
     public class MOVE_DESC
@@ -71,6 +78,8 @@ public abstract class CharaControl : MonoBehaviour
     [SerializeField]
     protected bool IsVisibility = false;
 
+    public TagControl tagControl;
+
     private void OnValidate()
     {
         MoveDesc.HealthRunSpeed = Mathf.Max(0.0f, MoveDesc.HealthRunSpeed);
@@ -92,25 +101,30 @@ public abstract class CharaControl : MonoBehaviour
     {
         healthCount = 0f;
         healthState = StartHealthState;
+        Material mat = renderer.material;
         switch (healthState)
         {
             case HEALTH_STATE.HEALTH:
                 MaxWalkSpeed = MoveDesc.HealthWalkSpeed;
                 MaxRunSpeed = MoveDesc.HealthRunSpeed;
                 MaxStamina = MoveDesc.HealthStamina;
+                mat.color = Colors.White;
                 break;
             case HEALTH_STATE.OUTBREAK:
                 MaxWalkSpeed = MoveDesc.OutbreakWalkSpeed;
                 MaxRunSpeed = MoveDesc.OutbreakRunSpeed;
                 MaxStamina = MoveDesc.OutbreakStamina;
+                mat.color = OutbreakBodyColor;
                 break;
             default:
                 MaxWalkSpeed = MoveDesc.HealthWalkSpeed;
                 MaxRunSpeed = MoveDesc.HealthRunSpeed;
                 MaxStamina = MoveDesc.HealthStamina;
+                mat.color = Colors.White;
                 break;
         }
         stamina = MaxStamina;
+        animHash_Dead = Animator.StringToHash("Base Layer.Dead");
     }
 
     protected virtual void Update()
@@ -130,6 +144,18 @@ public abstract class CharaControl : MonoBehaviour
 
     public abstract void Caught();
 
-    public abstract void Dead();
+    public virtual void Dead()
+    {
+        animator.SetTrigger("IsDead");
+        healthState = HEALTH_STATE.DEAD;
+        var colorOverLifetime = particle.colorOverLifetime;
+        var gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(new Color32(0, 128, 255, 255), 0.0f), new GradientColorKey(Color.white, 1.0f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(1.0f, 0.72f), new GradientAlphaKey(0.0f, 1.0f) }
+            );
+        colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
+        particle.Play();
+    }
 
 }

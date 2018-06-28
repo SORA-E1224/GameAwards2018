@@ -79,23 +79,30 @@ public class EnemyControl : CharaControl
         agent = GetComponent<NavMeshAgent>();
         System.Random rand = new System.Random();
         targetIndex = rand.Next(markers.Length);
-        agent.SetDestination(markers[targetIndex].transform.position);
+        //agent.SetDestination(markers[targetIndex].transform.position);
         agent.speed = MaxWalkSpeed;
         agent.angularSpeed = RotDesc.Speed;
-        
+
         visionDesc.Field.GetComponent<MeshRenderer>().enabled = IsVisibility;
         hearingDesc.Field.GetComponent<MeshRenderer>().enabled = IsVisibility;
 
-        Material mat = renderer.material;
-        mat.color = Color.yellow;
         UnableRun = false;
     }
 
     // Update is called once per frame
     protected override void Update()
     {
+        if (tagControl.tagState == TagControl.TagState.READY)
+        {
+            return;
+        }
+
         base.Update();
         AIProcessing();
+        Vector3 v = agent.velocity;
+        animator.SetFloat("Speed", v.magnitude);
+        animator.SetFloat("InputY", v.magnitude / MaxWalkSpeed);
+
     }
 
     // Discovering Player Func
@@ -187,16 +194,8 @@ public class EnemyControl : CharaControl
     // Dead Func
     public override void Dead()
     {
-        healthState = HEALTH_STATE.DEAD;
+        base.Dead();
         state = ENEMY_STATE.DEAD;
-        var colorOverLifetime = particle.colorOverLifetime;
-        var gradient = new Gradient();
-        gradient.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(new Color32(0, 128, 255, 255), 0.0f), new GradientColorKey(Color.white, 1.0f) },
-            new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(1.0f, 0.72f), new GradientAlphaKey(0.0f, 1.0f) }
-            );
-        colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
-        particle.Play();
     }
 
     // CPU AI Processing Func
@@ -240,7 +239,9 @@ public class EnemyControl : CharaControl
         Material mat = renderer.material;
         agent.isStopped = true;
         count += Time.deltaTime;
-        mat.color = Color.Lerp(Color.green, new Color(0f, 1f, 0f, 0f), count / DeadTime);
+        Color outbreakTrans = OutbreakBodyColor;
+        outbreakTrans.a = 0.0f;
+        mat.color = Color.Lerp(OutbreakBodyColor, outbreakTrans, count / DeadTime);
         if (count > DeadTime)
         {
             count = 0f;
@@ -259,7 +260,7 @@ public class EnemyControl : CharaControl
             stamina = MaxStamina;
             UnableRun = false;
         }
-        if (agent.remainingDistance < 1.0f)
+        if (agent.remainingDistance < 1.0f || agent.destination == Vector3.zero)
         {
             System.Random rand = new System.Random();
             targetIndex = rand.Next(markers.Length);
@@ -319,7 +320,7 @@ public class EnemyControl : CharaControl
                 charaControl.Caught();
                 state = ENEMY_STATE.RECOVER;
                 healthState = HEALTH_STATE.IMMUNITY;
-                mat.color = Color.yellow;
+                mat.color = Colors.White;
                 MaxStamina = MoveDesc.HealthStamina;
                 MaxWalkSpeed = MoveDesc.HealthWalkSpeed;
                 MaxRunSpeed = MoveDesc.HealthRunSpeed;
@@ -417,11 +418,11 @@ public class EnemyControl : CharaControl
         Material mat = renderer.material;
         agent.isStopped = true;
         count += Time.deltaTime;
-        mat.color = Color.Lerp(Color.yellow, Color.green, count / ChargeTime);
+        mat.color = Color.Lerp(Colors.White, OutbreakBodyColor, count / ChargeTime);
         if (count > ChargeTime)
         {
             count = 0f;
-            mat.color = Color.green;
+            mat.color = OutbreakBodyColor;
             state = ENEMY_STATE.PATROL;
             agent.isStopped = false;
             particle.Stop();
@@ -434,11 +435,11 @@ public class EnemyControl : CharaControl
         Material mat = renderer.material;
         agent.isStopped = true;
         count += Time.deltaTime;
-        mat.color = Color.Lerp(Color.green, Color.yellow, count / RecoverTime);
+        mat.color = Color.Lerp(OutbreakBodyColor, Colors.White, count / RecoverTime);
         if (count > RecoverTime)
         {
             count = 0f;
-            mat.color = Color.yellow;
+            mat.color = Colors.White;
             state = ENEMY_STATE.PATROL;
             agent.isStopped = false;
         }
