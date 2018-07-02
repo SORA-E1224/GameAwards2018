@@ -36,15 +36,12 @@ public class Title : MonoBehaviour
 
     public void GetUp()
     {
-        AnimatorStateInfo anim = playerAnimator.GetCurrentAnimatorStateInfo(0);
-        prevState = currentState;
-        currentState = anim.fullPathHash;
-
-        if (anim.fullPathHash == Idle)
+        
+        if (currentState == Idle)
         {
             playerAnimator.SetTrigger("Stretch");
         }
-        else if (anim.fullPathHash == Stretch)
+        else if (currentState == Stretch)
         {
             playerAnimator.SetTrigger("Wait");
         }
@@ -62,8 +59,10 @@ public class Title : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-        if (!SceneController.IsFade())
+        AnimatorStateInfo anim = playerAnimator.GetCurrentAnimatorStateInfo(0);
+        prevState = currentState;
+        currentState = anim.fullPathHash;
+        if (!SceneController.IsFade() && !playerAnimator.GetBool("GetUp"))
         {
             GetUp();
             if (currentState == Idle && prevState == Stretch)
@@ -90,7 +89,7 @@ public class Title : MonoBehaviour
         }
         if (TControl == true)
         {
-            if (Input.GetKeyDown(KeyCode.Return))
+            if (Input.GetAxis("RunTrigger") > 0.8f)
             {
                 target.SetTrigger("character_nearby");
                 playerAnimator.ResetTrigger("Stop");

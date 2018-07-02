@@ -197,6 +197,10 @@ public class TagControl : MonoBehaviour
         }
 
 
+        if (!Debug.isDebugBuild)
+        {
+            return;
+        }
 
         if (Input.GetAxis("ChangeCamera") > 0.9f && !trigger)
         {

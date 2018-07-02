@@ -27,7 +27,7 @@ public class SceneController : MonoBehaviour
     private float fadeCount;
 
     [SerializeField]
-    private new Material matFade;
+    private Material matFade;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Initialize()

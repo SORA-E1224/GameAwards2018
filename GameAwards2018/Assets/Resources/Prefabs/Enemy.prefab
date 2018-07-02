@@ -139,6 +139,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1046448972752802
+GameObject:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4151750666574144}
+  - component: {fileID: 108608060057350368}
+  m_Layer: 10
+  m_Name: Spot Light
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1062995479354806
 GameObject:
   m_ObjectHideFlags: 1
@@ -1470,7 +1486,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1747904994041222
 GameObject:
   m_ObjectHideFlags: 1
@@ -2153,11 +2169,24 @@ Transform:
   m_GameObject: {fileID: 1244985104605190}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 15, y: 1, z: 15}
+  m_LocalScale: {x: 20, y: 1, z: 20}
   m_Children: []
   m_Father: {fileID: 4483961288875060}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &4151750666574144
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1046448972752802}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.25, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4388468093839742}
+  m_RootOrder: 38
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!4 &4157184068549012
 Transform:
   m_ObjectHideFlags: 1
@@ -2476,6 +2505,7 @@ Transform:
   - {fileID: 4275134428643558}
   - {fileID: 4933445777065094}
   - {fileID: 4908349182451854}
+  - {fileID: 4151750666574144}
   m_Father: {fileID: 4483961288875060}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3048,7 +3078,7 @@ Transform:
   m_GameObject: {fileID: 1908839120012818}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 1.5, z: 0.5}
-  m_LocalScale: {x: 11.547005, y: 6.49519, z: 10}
+  m_LocalScale: {x: 35.75261, y: 20.110844, z: 15}
   m_Children: []
   m_Father: {fileID: 4483961288875060}
   m_RootOrder: 1
@@ -4191,6 +4221,42 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!108 &108608060057350368
+Light:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1046448972752802}
+  m_Enabled: 1
+  serializedVersion: 8
+  m_Type: 0
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 5
+  m_Range: 30
+  m_SpotAngle: 90
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_Lightmapping: 4
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
 --- !u!114 &114086740753218002
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4222,15 +4288,15 @@ MonoBehaviour:
   RotDesc:
     Speed: 180
   particle: {fileID: 198844068582567354}
-  IsVisibility: 1
+  IsVisibility: 0
   tagControl: {fileID: 0}
   visionDesc:
-    Visibility: 10
-    Angle: 60
+    Visibility: 15
+    Angle: 100
     DetectTime: 5
     Field: {fileID: 1908839120012818}
   hearingDesc:
-    Radius: 15
+    Radius: 20
     Field: {fileID: 1244985104605190}
   mask:
     serializedVersion: 2
@@ -6473,7 +6539,7 @@ NavMeshAgent:
   m_Height: 1.8
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 1
+  m_ObstacleAvoidanceType: 4
 --- !u!198 &198844068582567354
 ParticleSystem:
   m_ObjectHideFlags: 1

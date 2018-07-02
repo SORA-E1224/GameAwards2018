@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2015
+# Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAwards2018", "Assembly-CSharp.csproj", "{302DC933-CB01-C312-5A0E-F3F993EF513E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAwards2018", "Assembly-CSharp-Editor.csproj", "{BA95A336-6855-8618-C582-19A2C8336E68}"

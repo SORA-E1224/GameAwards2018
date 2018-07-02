@@ -18,11 +18,15 @@ public class PlayerControl : CharaControl
     Slider staminaGage;
     Image gageColor;
 
+    [SerializeField]
+    Image healthMark;
+    Sprite healthSpr, outbreakSpr;
+
     // Use this for initialization
     protected override void Start()
     {
         base.Start();
-        healthState = HEALTH_STATE.OUTBREAK;
+
         IsActionTrigger = false;
         IsCharge = false;
         IsRecover = false;
@@ -37,6 +41,17 @@ public class PlayerControl : CharaControl
         CaughtStaminaBuff = 0f;
         gageColor = staminaGage.gameObject.transform.Find("Fill Area").GetComponentInChildren<Image>();
         gageColor.color = Colors.Aqua;
+
+        healthSpr = Resources.Load<Sprite>("Textures/tex_HealthMark");
+        outbreakSpr = Resources.Load<Sprite>("Textures/tex_OutbreakMark");
+        if (healthState == HEALTH_STATE.HEALTH)
+        {
+            healthMark.sprite = healthSpr;
+        }
+        else
+        {
+            healthMark.sprite = outbreakSpr;
+        }
 
     }
 
@@ -66,9 +81,12 @@ public class PlayerControl : CharaControl
             return;
         }
 
-        if (tagControl.tagState != TagControl.TagState.GAME)
+        if (tagControl)
         {
-            return;
+            if (tagControl.tagState != TagControl.TagState.GAME)
+            {
+                return;
+            }
         }
 
         if (Input.GetAxis("ActionTrigger") > 0.9f)
@@ -265,6 +283,7 @@ public class PlayerControl : CharaControl
             {
                 charaControl.Caught();
                 healthState = HEALTH_STATE.IMMUNITY;
+                healthMark.sprite = healthSpr;
                 IsActionTrigger = true;
                 MaxStamina = MoveDesc.HealthStamina;
                 MaxWalkSpeed = MoveDesc.HealthWalkSpeed;
@@ -283,6 +302,7 @@ public class PlayerControl : CharaControl
         }
 
         healthState = HEALTH_STATE.OUTBREAK;
+        healthMark.sprite = outbreakSpr;
         IsCharge = true;
         count = 0f;
         particle.Play();

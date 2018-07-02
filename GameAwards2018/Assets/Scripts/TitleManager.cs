@@ -20,9 +20,11 @@ public class TitleManager : MonoBehaviour
             return;
         }
 
+#if false
         if (Input.GetKeyDown(KeyCode.Return))
         {
             SceneController.Fade(SceneController.FADE_MODE.FADEMODE_OUT, "GameMain");
         }
+#endif
     }
 }
